@@ -15,6 +15,7 @@ export default defineConfig([
       'no-underscore-dangle': ['error', { allow: ['_id'] }],
       '@typescript-eslint/parameter-properties': 'off',
       'unicorn/prefer-top-level-await': 'off',
+      'unicorn/filename-case': 'off',
     },
     languageOptions: {
       parserOptions: {

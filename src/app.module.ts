@@ -5,6 +5,7 @@ import { AppController } from '@/app.controller';
 import { AppService } from '@/app.service';
 import configuration, { schema } from '@/configuration';
 import { DatabaseModule } from '@/database/database.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { DatabaseModule } from '@/database/database.module';
       load: [configuration],
     }),
     DatabaseModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
