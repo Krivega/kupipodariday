@@ -1,4 +1,4 @@
-import { IsInt, Min } from 'class-validator';
+import { IsBoolean, IsInt, Min } from 'class-validator';
 import {
   CreateDateColumn,
   Entity,
@@ -21,5 +21,9 @@ export class Offer {
   @Column('decimal', { precision: 10, scale: 2, default: 0 })
   @IsInt()
   @Min(0)
-  amount = 0;
+  amount = 0; // сумма заявки, округляется до двух знаков после запятой;
+
+  @Column({ default: false })
+  @IsBoolean()
+  hidden = false; // флаг, который определяет показывать ли информацию о скидывающемся пользователе в списке. По умолчанию равен false.
 }
