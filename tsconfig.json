@@ -25,5 +25,11 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false
   },
-  "include": ["./src", "./test", "./eslint.config.ts", "./jest.config.ts"]
+  "include": [
+    "./src",
+    "./test",
+    "./eslint.config.ts",
+    "./jest.config.ts",
+    "./ormconfig.ts"
+  ]
 }
