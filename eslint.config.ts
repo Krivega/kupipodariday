@@ -16,6 +16,7 @@ export default defineConfig([
       '@typescript-eslint/parameter-properties': 'off',
       'unicorn/prefer-top-level-await': 'off',
       'unicorn/filename-case': 'off',
+      '@typescript-eslint/no-extraneous-class': 'off', // TODO: remove this rule
     },
     languageOptions: {
       parserOptions: {
