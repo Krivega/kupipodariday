@@ -6,6 +6,7 @@ import {
   IsNotEmpty,
   MinLength,
   MaxLength,
+  IsNumber,
 } from 'class-validator';
 import {
   CreateDateColumn,
@@ -20,6 +21,7 @@ import {
 
 import { Offer } from '@/offers/entities/offer.entity';
 import { User } from '@/users/entities/user.entity';
+import { Wishlist } from '@/wishlists/entities/wishlist.entity';
 
 @Entity()
 export class Wish {
@@ -48,12 +50,12 @@ export class Wish {
   image!: string; // ссылка на изображение подарка, строка. Должна быть валидным URL.
 
   @Column('decimal', { precision: 10, scale: 2 })
-  @IsInt()
-  @Min(1)
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @Min(0.01)
   price!: number; // стоимость подарка, с округлением до сотых, число.
 
   @Column('decimal', { precision: 10, scale: 2, default: 0 })
-  @IsInt()
+  @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0)
   raised = 0; // сумма предварительного сбора или сумма, которую пользователи сейчас готовы скинуть на подарок. Также округляется до сотых.
 
@@ -88,4 +90,15 @@ export class Wish {
     },
   )
   offers: Offer[]; // массив ссылок на заявки скинуться от других пользователей.
+
+  @ManyToOne(
+    () => {
+      return Wishlist;
+    },
+    (wishlist) => {
+      return wishlist.items;
+    },
+  )
+  @JoinColumn({ name: 'wishlist_id' })
+  wishlist: Wishlist;
 }

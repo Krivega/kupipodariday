@@ -1,4 +1,4 @@
-import { IsBoolean, IsInt, Min } from 'class-validator';
+import { IsBoolean, IsNumber, Min } from 'class-validator';
 import {
   CreateDateColumn,
   Entity,
@@ -23,7 +23,7 @@ export class Offer {
   updatedAt!: Date;
 
   @Column('decimal', { precision: 10, scale: 2, default: 0 })
-  @IsInt()
+  @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0)
   amount = 0; // сумма заявки, округляется до двух знаков после запятой;
 

@@ -5,11 +5,13 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
   Column,
-  OneToOne,
+  ManyToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 
 import { User } from '@/users/entities/user.entity';
+import { Wish } from '@/wishes/entities/wish.entity';
 
 @Entity()
 export class Wishlist {
@@ -38,9 +40,19 @@ export class Wishlist {
   @IsUrl()
   image!: string; // обложка для подборки, строка. Должна быть валидным URL.
 
-  @OneToOne(() => {
+  @ManyToOne(() => {
     return User;
   })
   @JoinColumn()
   owner: User; // ссылка на пользователя, который создал подборку.
+
+  @OneToMany(
+    () => {
+      return Wish;
+    },
+    (wish) => {
+      return wish.wishlist;
+    },
+  )
+  items: Wish[]; // набор ссылок на подарки
 }
