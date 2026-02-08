@@ -15,7 +15,9 @@ import {
   OneToMany,
 } from 'typeorm';
 
+import { Offer } from '@/offers/entities/offer.entity';
 import { Wish } from '@/wishes/entities/wish.entity';
+import { Wishlist } from '@/wishlists/entities/wishlist.entity';
 
 @Entity()
 export class User {
@@ -65,5 +67,23 @@ export class User {
   )
   wishes: Wish[]; // список желаемых подарков. Используйте для него соответствующий тип связи.
 
-  offers;
+  @OneToMany(
+    () => {
+      return Offer;
+    },
+    (offer) => {
+      return offer.user;
+    },
+  )
+  offers: Offer[]; // массив ссылок на заявки скинуться от других пользователей.
+
+  @OneToMany(
+    () => {
+      return Wishlist;
+    },
+    (wishlist) => {
+      return wishlist.owner;
+    },
+  )
+  wishlists: Wishlist[]; // содержит список вишлистов, которые создал пользователь. Установите для него подходящий тип связи.
 }

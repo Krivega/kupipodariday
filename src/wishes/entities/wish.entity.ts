@@ -15,8 +15,10 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 
+import { Offer } from '@/offers/entities/offer.entity';
 import { User } from '@/users/entities/user.entity';
 
 @Entity()
@@ -76,4 +78,14 @@ export class Wish {
   )
   @JoinColumn({ name: 'owner_id' })
   owner: User; // ссылка на пользователя, который добавил пожелание подарка.
+
+  @OneToMany(
+    () => {
+      return Offer;
+    },
+    (offer) => {
+      return offer.item;
+    },
+  )
+  offers: Offer[]; // массив ссылок на заявки скинуться от других пользователей.
 }

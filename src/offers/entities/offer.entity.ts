@@ -5,7 +5,11 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
   Column,
+  ManyToOne,
 } from 'typeorm';
+
+import { User } from '@/users/entities/user.entity';
+import { Wish } from '@/wishes/entities/wish.entity';
 
 @Entity()
 export class Offer {
@@ -26,4 +30,24 @@ export class Offer {
   @Column({ default: false })
   @IsBoolean()
   hidden = false; // флаг, который определяет показывать ли информацию о скидывающемся пользователе в списке. По умолчанию равен false.
+
+  @ManyToOne(
+    () => {
+      return User;
+    },
+    (user) => {
+      return user.offers;
+    },
+  )
+  user: User; // содержит id желающего скинуться;
+
+  @ManyToOne(
+    () => {
+      return Wish;
+    },
+    (wish) => {
+      return wish.offers;
+    },
+  )
+  item: Wish; // содержит ссылку на товар;
 }

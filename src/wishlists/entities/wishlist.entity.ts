@@ -5,7 +5,11 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
   Column,
+  OneToOne,
+  JoinColumn,
 } from 'typeorm';
+
+import { User } from '@/users/entities/user.entity';
 
 @Entity()
 export class Wishlist {
@@ -33,4 +37,10 @@ export class Wishlist {
   @Column()
   @IsUrl()
   image!: string; // обложка для подборки, строка. Должна быть валидным URL.
+
+  @OneToOne(() => {
+    return User;
+  })
+  @JoinColumn()
+  owner: User; // ссылка на пользователя, который создал подборку.
 }
