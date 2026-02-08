@@ -63,5 +63,7 @@ export class User {
       return wish.owner;
     },
   )
-  wishes: Wish[];
+  wishes: Wish[]; // список желаемых подарков. Используйте для него соответствующий тип связи.
+
+  offers;
 }

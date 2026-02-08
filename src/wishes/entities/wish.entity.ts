@@ -75,5 +75,5 @@ export class Wish {
     },
   )
   @JoinColumn({ name: 'owner_id' })
-  owner: User;
+  owner: User; // ссылка на пользователя, который добавил пожелание подарка.
 }
