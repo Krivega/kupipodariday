@@ -4,6 +4,7 @@ import {
   MinLength,
   IsEmail,
   MaxLength,
+  IsUrl,
 } from 'class-validator';
 import {
   CreateDateColumn,
@@ -46,4 +47,8 @@ export class User {
   @IsString()
   @MinLength(6)
   password!: string; // password, строка от 6 до 32 символов, обязательное поле
+
+  @Column({ default: 'https://i.pravatar.cc/300' })
+  @IsUrl()
+  avatar!: string; // сылка на аватар. В качестве значения по умолчанию задайте https://i.pravatar.cc/300
 }
