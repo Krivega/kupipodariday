@@ -13,7 +13,11 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
   Column,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
+
+import { User } from '@/users/entities/user.entity';
 
 @Entity()
 export class Wish {
@@ -61,4 +65,15 @@ export class Wish {
   @MinLength(1)
   @MaxLength(1024)
   description!: string; // строка с описанием подарка длиной от 1 и до 1024 символов
+
+  @ManyToOne(
+    () => {
+      return User;
+    },
+    (user) => {
+      return user.wishes;
+    },
+  )
+  @JoinColumn({ name: 'owner_id' })
+  owner: User;
 }

@@ -12,7 +12,10 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
   Column,
+  OneToMany,
 } from 'typeorm';
+
+import { Wish } from '@/wishes/entities/wish.entity';
 
 @Entity()
 export class User {
@@ -51,4 +54,14 @@ export class User {
   @Column({ default: 'https://i.pravatar.cc/300' })
   @IsUrl()
   avatar!: string; // сылка на аватар. В качестве значения по умолчанию задайте https://i.pravatar.cc/300
+
+  @OneToMany(
+    () => {
+      return Wish;
+    },
+    (wish) => {
+      return wish.owner;
+    },
+  )
+  wishes: Wish[];
 }
