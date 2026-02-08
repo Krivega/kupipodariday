@@ -9,5 +9,5 @@ export const AppDataSource = new DataSource({
   database: 'kupipodariday',
   entities: ['src/**/entities/*.entity{.ts,.js}'],
   migrations: ['src/database/migrations/*.ts'],
-  synchronize: false,
+  synchronize: true,
 });
