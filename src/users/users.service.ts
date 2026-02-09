@@ -1,28 +1,41 @@
-/* eslint-disable @typescript-eslint/class-methods-use-this */
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { Repository, DataSource } from 'typeorm';
+import { Logger } from 'winston';
 
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { User } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
-  public create(_createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  public constructor(
+    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
+    private readonly dataSource: DataSource,
+    @InjectRepository(User)
+    private readonly usersRepository: Repository<User>,
+  ) {}
+
+  public async create(createUserDto: CreateUserDto) {
+    const user = this.usersRepository.create(createUserDto);
+
+    return this.usersRepository.save(user);
   }
 
-  public findAll() {
-    return 'This action returns all users';
+  public async findAll() {
+    return this.usersRepository.find();
   }
 
-  public findOne(id: number) {
-    return `This action returns a #${id} user`;
+  public async findOne(id: number) {
+    return this.usersRepository.findOne({ where: { id } });
   }
 
-  public update(id: number, _updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  public async update(id: number, updateUserDto: UpdateUserDto) {
+    return this.usersRepository.update({ id }, updateUserDto);
   }
 
-  public remove(id: number) {
-    return `This action removes a #${id} user`;
+  public async remove(id: number) {
+    return this.usersRepository.delete(id);
   }
 }
