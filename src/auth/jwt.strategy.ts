@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
-import { UsersService } from '../users/users.service';
+import { UsersService } from '@/users/users.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -22,14 +22,20 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   /**
-   * Метод validate должен вернуть данные пользователя
-   * В JWT стратегии в качестве параметра метод получает полезную нагрузку из токена
+   * Метод validate должен вернуть данные пользователя.
+   * В JWT стратегии в качестве параметра метод получает полезную нагрузку из токена.
+   * Проверка tokenVersion инвалидирует токены после выхода (signout).
    */
-  public async validate(_jwtPayload: { sub: number }) {
-    /* В subject токена будем передавать идентификатор пользователя */
-    const user = await this.usersService.findOne({ id: _jwtPayload.sub });
+  public async validate(jwtPayload: { sub: number; tokenVersion?: number }) {
+    const user = await this.usersService.findOne({ id: jwtPayload.sub });
 
     if (user === null) {
+      throw new UnauthorizedException();
+    }
+
+    const tokenVersion = jwtPayload.tokenVersion ?? 0;
+
+    if (user.tokenVersion !== tokenVersion) {
       throw new UnauthorizedException();
     }
 

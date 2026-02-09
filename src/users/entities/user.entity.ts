@@ -57,6 +57,10 @@ export class User {
   @MinLength(6)
   password!: string; // пароль пользователя, строка
 
+  /** Версия токена: при выходе увеличивается, все старые JWT перестают приниматься */
+  @Column({ type: 'int', default: 0 })
+  tokenVersion!: number;
+
   @OneToMany(
     () => {
       return Wish;

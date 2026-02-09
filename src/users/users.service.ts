@@ -55,4 +55,9 @@ export class UsersService {
   public async remove(filter: FindOptionsWhere<User>) {
     return this.usersRepository.delete(filter);
   }
+
+  /** Увеличивает tokenVersion пользователя — инвалидирует все выданные ему JWT */
+  public async incrementTokenVersion(userId: number): Promise<void> {
+    await this.usersRepository.increment({ id: userId }, 'tokenVersion', 1);
+  }
 }

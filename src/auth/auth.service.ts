@@ -22,10 +22,18 @@ export class AuthService {
     return this.auth(user);
   }
 
-  public auth(user: { id: number }) {
-    const payload = { sub: user.id };
+  public auth(user: { id: number; tokenVersion?: number }) {
+    const payload = {
+      sub: user.id,
+      tokenVersion: user.tokenVersion ?? 0,
+    };
 
     return { access_token: this.jwtService.sign(payload) };
+  }
+
+  /** Инвалидирует все JWT пользователя: увеличивает tokenVersion в БД */
+  public async signout(userId: number): Promise<void> {
+    await this.usersService.incrementTokenVersion(userId);
   }
 
   public async validatePassword({

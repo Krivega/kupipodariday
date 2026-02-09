@@ -4,6 +4,8 @@ import {
   Body,
   UseGuards,
   Req,
+  HttpCode,
+  HttpStatus,
   UnauthorizedException,
   ConflictException,
 } from '@nestjs/common';
@@ -12,6 +14,7 @@ import { CreateUserDto } from '@/users/dto/create-user.dto';
 import { UsersService } from '@/users/users.service';
 import { AuthService } from './auth.service';
 import { AuthLocalGuard } from './guards/auth.guard';
+import { AuthJwtGuard } from './guards/jwt.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -33,8 +36,28 @@ export class AuthController {
       throw new UnauthorizedException();
     }
 
-    /* Генерируем для пользователя JWT-токен */
-    return this.authService.auth({ id: user.id });
+    /* Генерируем для пользователя JWT-токен (в payload — tokenVersion для инвалидации при выходе) */
+    return this.authService.auth({
+      id: user.id,
+      tokenVersion: user.tokenVersion,
+    });
+  }
+
+  /**
+   * Выход: увеличиваем tokenVersion пользователя — все старые JWT перестают приниматься.
+   * Клиенту следует удалить сохранённый access_token после успешного ответа.
+   */
+  @UseGuards(AuthJwtGuard)
+  @Post('signout')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  public async signout(@Req() req: Request): Promise<void> {
+    const { user } = req;
+
+    if (user === undefined) {
+      throw new UnauthorizedException();
+    }
+
+    await this.authService.signout(user.id);
   }
 
   @Post('signup')
