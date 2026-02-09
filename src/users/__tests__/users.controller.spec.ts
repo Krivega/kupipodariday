@@ -9,9 +9,22 @@ describe('UsersController', () => {
   let controller: UsersController;
 
   beforeEach(async () => {
+    const mockUsersService = {
+      create: jest.fn(),
+      findMany: jest.fn(),
+      findOne: jest.fn(),
+      update: jest.fn(),
+      remove: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [UsersController],
-      providers: [UsersService],
+      providers: [
+        {
+          provide: UsersService,
+          useValue: mockUsersService,
+        },
+      ],
     }).compile();
 
     controller = module.get<UsersController>(UsersController);

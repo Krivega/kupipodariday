@@ -17,27 +17,30 @@ export class UsersController {
   public constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  public create(@Body() createUserDto: CreateUserDto) {
+  public async create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
 
   @Get()
-  public findAll() {
-    return this.usersService.findAll();
+  public async findAll() {
+    return this.usersService.findMany({});
   }
 
   @Get(':id')
-  public findOne(@Param('id') id: string) {
-    return this.usersService.findOne(Number(id));
+  public async findOne(@Param('id') id: string) {
+    return this.usersService.findOne({ id: Number(id) });
   }
 
   @Patch(':id')
-  public update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(Number(id), updateUserDto);
+  public async update(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    return this.usersService.update({ id: Number(id) }, updateUserDto);
   }
 
   @Delete(':id')
-  public remove(@Param('id') id: string) {
-    return this.usersService.remove(Number(id));
+  public async remove(@Param('id') id: string) {
+    return this.usersService.remove({ id: Number(id) });
   }
 }

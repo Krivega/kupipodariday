@@ -1,8 +1,6 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { Repository, DataSource } from 'typeorm';
-import { Logger } from 'winston';
+import { Repository, FindManyOptions, FindOptionsWhere } from 'typeorm';
 
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -11,31 +9,44 @@ import { User } from './entities/user.entity';
 @Injectable()
 export class UsersService {
   public constructor(
-    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
-    private readonly dataSource: DataSource,
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
   ) {}
 
-  public async create(createUserDto: CreateUserDto) {
+  public async create(createUserDto: CreateUserDto): Promise<User> {
     const user = this.usersRepository.create(createUserDto);
 
     return this.usersRepository.save(user);
   }
 
-  public async findAll() {
-    return this.usersRepository.find();
+  public async findOne(
+    filter: FindOptionsWhere<User>,
+    options?: Omit<FindManyOptions<User>, 'where'>,
+  ): Promise<User | null> {
+    return this.usersRepository.findOne({
+      ...options,
+      where: filter,
+    });
   }
 
-  public async findOne(id: number) {
-    return this.usersRepository.findOne({ where: { id } });
+  public async findMany(
+    filter: FindOptionsWhere<User>,
+    options?: Omit<FindManyOptions<User>, 'where'>,
+  ): Promise<User[]> {
+    return this.usersRepository.find({
+      ...options,
+      where: filter,
+    });
   }
 
-  public async update(id: number, updateUserDto: UpdateUserDto) {
-    return this.usersRepository.update({ id }, updateUserDto);
+  public async update(
+    filter: FindOptionsWhere<User>,
+    updateUserDto: UpdateUserDto,
+  ) {
+    return this.usersRepository.update(filter, updateUserDto);
   }
 
-  public async remove(id: number) {
-    return this.usersRepository.delete(id);
+  public async remove(filter: FindOptionsWhere<User>) {
+    return this.usersRepository.delete(filter);
   }
 }
