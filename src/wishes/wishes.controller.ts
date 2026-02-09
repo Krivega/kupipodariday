@@ -17,27 +17,30 @@ export class WishesController {
   public constructor(private readonly wishesService: WishesService) {}
 
   @Post()
-  public create(@Body() createWishDto: CreateWishDto) {
+  public async create(@Body() createWishDto: CreateWishDto) {
     return this.wishesService.create(createWishDto);
   }
 
   @Get()
-  public findAll() {
-    return this.wishesService.findAll();
+  public async findAll() {
+    return this.wishesService.findMany({});
   }
 
   @Get(':id')
-  public findOne(@Param('id') id: string) {
-    return this.wishesService.findOne(Number(id));
+  public async findOne(@Param('id') id: string) {
+    return this.wishesService.findOne({ id: Number(id) });
   }
 
   @Patch(':id')
-  public update(@Param('id') id: string, @Body() updateWishDto: UpdateWishDto) {
-    return this.wishesService.update(Number(id), updateWishDto);
+  public async update(
+    @Param('id') id: string,
+    @Body() updateWishDto: UpdateWishDto,
+  ) {
+    return this.wishesService.update({ id: Number(id) }, updateWishDto);
   }
 
   @Delete(':id')
-  public remove(@Param('id') id: string) {
-    return this.wishesService.remove(Number(id));
+  public async remove(@Param('id') id: string) {
+    return this.wishesService.remove({ id: Number(id) });
   }
 }

@@ -1,28 +1,52 @@
-/* eslint-disable @typescript-eslint/class-methods-use-this */
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, FindManyOptions, FindOptionsWhere } from 'typeorm';
 
 import { CreateWishlistDto } from './dto/create-wishlist.dto';
 import { UpdateWishlistDto } from './dto/update-wishlist.dto';
+import { Wishlist } from './entities/wishlist.entity';
 
 @Injectable()
 export class WishlistsService {
-  public create(_createWishlistDto: CreateWishlistDto) {
-    return 'This action adds a new wishlist';
+  public constructor(
+    @InjectRepository(Wishlist)
+    private readonly usersRepository: Repository<Wishlist>,
+  ) {}
+
+  public async create(createWishlistDto: CreateWishlistDto): Promise<Wishlist> {
+    const wishlist = this.usersRepository.create(createWishlistDto);
+
+    return this.usersRepository.save(wishlist);
   }
 
-  public findAll() {
-    return 'This action returns all wishlists';
+  public async findOne(
+    filter: FindOptionsWhere<Wishlist>,
+    options?: Omit<FindManyOptions<Wishlist>, 'where'>,
+  ): Promise<Wishlist | null> {
+    return this.usersRepository.findOne({
+      ...options,
+      where: filter,
+    });
   }
 
-  public findOne(id: number) {
-    return `This action returns a #${id} wishlist`;
+  public async findMany(
+    filter: FindOptionsWhere<Wishlist>,
+    options?: Omit<FindManyOptions<Wishlist>, 'where'>,
+  ): Promise<Wishlist[]> {
+    return this.usersRepository.find({
+      ...options,
+      where: filter,
+    });
   }
 
-  public update(id: number, _updateWishlistDto: UpdateWishlistDto) {
-    return `This action updates a #${id} wishlist`;
+  public async update(
+    filter: FindOptionsWhere<Wishlist>,
+    updateWishlistDto: UpdateWishlistDto,
+  ) {
+    return this.usersRepository.update(filter, updateWishlistDto);
   }
 
-  public remove(id: number) {
-    return `This action removes a #${id} wishlist`;
+  public async remove(filter: FindOptionsWhere<Wishlist>) {
+    return this.usersRepository.delete(filter);
   }
 }

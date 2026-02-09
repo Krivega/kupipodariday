@@ -1,28 +1,52 @@
-/* eslint-disable @typescript-eslint/class-methods-use-this */
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, FindManyOptions, FindOptionsWhere } from 'typeorm';
 
 import { CreateOfferDto } from './dto/create-offer.dto';
 import { UpdateOfferDto } from './dto/update-offer.dto';
+import { Offer } from './entities/offer.entity';
 
 @Injectable()
 export class OffersService {
-  public create(_createOfferDto: CreateOfferDto) {
-    return 'This action adds a new offer';
+  public constructor(
+    @InjectRepository(Offer)
+    private readonly usersRepository: Repository<Offer>,
+  ) {}
+
+  public async create(createOfferDto: CreateOfferDto): Promise<Offer> {
+    const offer = this.usersRepository.create(createOfferDto);
+
+    return this.usersRepository.save(offer);
   }
 
-  public findAll() {
-    return 'This action returns all offers';
+  public async findOne(
+    filter: FindOptionsWhere<Offer>,
+    options?: Omit<FindManyOptions<Offer>, 'where'>,
+  ): Promise<Offer | null> {
+    return this.usersRepository.findOne({
+      ...options,
+      where: filter,
+    });
   }
 
-  public findOne(id: number) {
-    return `This action returns a #${id} offer`;
+  public async findMany(
+    filter: FindOptionsWhere<Offer>,
+    options?: Omit<FindManyOptions<Offer>, 'where'>,
+  ): Promise<Offer[]> {
+    return this.usersRepository.find({
+      ...options,
+      where: filter,
+    });
   }
 
-  public update(id: number, _updateOfferDto: UpdateOfferDto) {
-    return `This action updates a #${id} offer`;
+  public async update(
+    filter: FindOptionsWhere<Offer>,
+    updateOfferDto: UpdateOfferDto,
+  ) {
+    return this.usersRepository.update(filter, updateOfferDto);
   }
 
-  public remove(id: number) {
-    return `This action removes a #${id} offer`;
+  public async remove(filter: FindOptionsWhere<Offer>) {
+    return this.usersRepository.delete(filter);
   }
 }

@@ -9,9 +9,22 @@ describe('WishlistsController', () => {
   let controller: WishlistsController;
 
   beforeEach(async () => {
+    const mockWishlistsService = {
+      create: jest.fn(),
+      findMany: jest.fn(),
+      findOne: jest.fn(),
+      update: jest.fn(),
+      remove: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [WishlistsController],
-      providers: [WishlistsService],
+      providers: [
+        {
+          provide: WishlistsService,
+          useValue: mockWishlistsService,
+        },
+      ],
     }).compile();
 
     controller = module.get<WishlistsController>(WishlistsController);

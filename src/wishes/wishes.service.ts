@@ -1,28 +1,52 @@
-/* eslint-disable @typescript-eslint/class-methods-use-this */
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, FindManyOptions, FindOptionsWhere } from 'typeorm';
 
 import { CreateWishDto } from './dto/create-wish.dto';
 import { UpdateWishDto } from './dto/update-wish.dto';
+import { Wish } from './entities/wish.entity';
 
 @Injectable()
 export class WishesService {
-  public create(_createWishDto: CreateWishDto) {
-    return 'This action adds a new wish';
+  public constructor(
+    @InjectRepository(Wish)
+    private readonly usersRepository: Repository<Wish>,
+  ) {}
+
+  public async create(createWishDto: CreateWishDto): Promise<Wish> {
+    const wish = this.usersRepository.create(createWishDto);
+
+    return this.usersRepository.save(wish);
   }
 
-  public findAll() {
-    return 'This action returns all wishes';
+  public async findOne(
+    filter: FindOptionsWhere<Wish>,
+    options?: Omit<FindManyOptions<Wish>, 'where'>,
+  ): Promise<Wish | null> {
+    return this.usersRepository.findOne({
+      ...options,
+      where: filter,
+    });
   }
 
-  public findOne(id: number) {
-    return `This action returns a #${id} wish`;
+  public async findMany(
+    filter: FindOptionsWhere<Wish>,
+    options?: Omit<FindManyOptions<Wish>, 'where'>,
+  ): Promise<Wish[]> {
+    return this.usersRepository.find({
+      ...options,
+      where: filter,
+    });
   }
 
-  public update(id: number, _updateWishDto: UpdateWishDto) {
-    return `This action updates a #${id} wish`;
+  public async update(
+    filter: FindOptionsWhere<Wish>,
+    updateWishDto: UpdateWishDto,
+  ) {
+    return this.usersRepository.update(filter, updateWishDto);
   }
 
-  public remove(id: number) {
-    return `This action removes a #${id} wish`;
+  public async remove(filter: FindOptionsWhere<Wish>) {
+    return this.usersRepository.delete(filter);
   }
 }
