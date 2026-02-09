@@ -20,6 +20,8 @@ export const schema = Joi.object({
     // synchronize должен быть булевым значением
     synchronize: Joi.boolean().default(false),
   }),
+  // jwt_secret для подписи JWT, обязателен для auth
+  jwt_secret: Joi.string().required(),
 });
 
 export default function configuration() {
@@ -36,5 +38,6 @@ export default function configuration() {
         process.env.NODE_ENV !== 'production' &&
         process.env.DATABASE_SYNCHRONIZE !== 'false',
     },
+    jwt_secret: process.env.JWT_SECRET,
   };
 }

@@ -49,6 +49,7 @@ describe('UsersService', () => {
       save: jest.fn(),
       findOne: jest.fn(),
       find: jest.fn(),
+      exists: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
     };
@@ -141,6 +142,41 @@ describe('UsersService', () => {
         where: filter,
         select: ['id', 'username'],
       });
+    });
+  });
+
+  describe('hasExists', () => {
+    it('should return true when entity exists', async () => {
+      const filter = { id: 1 };
+
+      (repository.exists as jest.Mock).mockResolvedValue(true);
+
+      const result = await service.hasExists(filter);
+
+      expect(repository.exists).toHaveBeenCalledWith({ where: filter });
+      expect(result).toBe(true);
+    });
+
+    it('should return false when entity does not exist', async () => {
+      const filter = { email: 'nonexistent@example.com' };
+
+      (repository.exists as jest.Mock).mockResolvedValue(false);
+
+      const result = await service.hasExists(filter);
+
+      expect(repository.exists).toHaveBeenCalledWith({ where: filter });
+      expect(result).toBe(false);
+    });
+
+    it('should accept array filter (FindOptionsWhere[])', async () => {
+      const filter = [{ username: 'user1' }, { email: 'user2@example.com' }];
+
+      (repository.exists as jest.Mock).mockResolvedValue(true);
+
+      const result = await service.hasExists(filter);
+
+      expect(repository.exists).toHaveBeenCalledWith({ where: filter });
+      expect(result).toBe(true);
     });
   });
 

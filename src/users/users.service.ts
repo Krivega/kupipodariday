@@ -29,6 +29,12 @@ export class UsersService {
     });
   }
 
+  public async hasExists(
+    filter: FindOptionsWhere<User> | FindOptionsWhere<User>[],
+  ): Promise<boolean> {
+    return this.usersRepository.exists({ where: filter });
+  }
+
   public async findMany(
     filter: FindOptionsWhere<User>,
     options?: Omit<FindManyOptions<User>, 'where'>,
