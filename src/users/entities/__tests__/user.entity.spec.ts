@@ -13,6 +13,7 @@ describe('User (schema)', () => {
     'avatar',
     'email',
     'password',
+    'tokenVersion',
   ];
   const expectedRelations = ['wishes', 'offers', 'wishlists'];
 

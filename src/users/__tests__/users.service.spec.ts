@@ -18,6 +18,7 @@ describe('UsersService', () => {
 
   const mockUser: User = {
     id: 1,
+    tokenVersion: 0,
     username: 'johndoe',
     about: 'About me',
     avatar: 'https://i.pravatar.cc/300',
