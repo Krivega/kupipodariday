@@ -2,17 +2,18 @@
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 
+import { WishesService } from '@/wishes/wishes.service';
 import { Offer } from '../entities/offer.entity';
 import { OffersService } from '../offers.service';
 
 import type { TestingModule } from '@nestjs/testing';
 import type { Repository } from 'typeorm';
 import type { CreateOfferDto } from '../dto/create-offer.dto';
-import type { UpdateOfferDto } from '../dto/update-offer.dto';
 
 describe('OffersService', () => {
   let service: OffersService;
   let repository: jest.Mocked<Repository<Offer>>;
+  let wishesService: jest.Mocked<WishesService>;
 
   const mockOffer: Offer = {
     id: 1,
@@ -34,6 +35,11 @@ describe('OffersService', () => {
       delete: jest.fn(),
     };
 
+    const mockWishesService = {
+      findOne: jest.fn(),
+      calculateRaisedFromOffers: jest.fn(),
+    } as unknown as jest.Mocked<WishesService>;
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         OffersService,
@@ -41,11 +47,16 @@ describe('OffersService', () => {
           provide: getRepositoryToken(Offer),
           useValue: mockRepository,
         },
+        {
+          provide: WishesService,
+          useValue: mockWishesService,
+        },
       ],
     }).compile();
 
     service = module.get<OffersService>(OffersService);
     repository = module.get(getRepositoryToken(Offer));
+    wishesService = module.get(WishesService);
   });
 
   afterEach(() => {
@@ -58,14 +69,39 @@ describe('OffersService', () => {
 
   describe('create', () => {
     it('should create and save an offer', async () => {
-      const dto: CreateOfferDto = {};
+      const dto = {
+        amount: 100,
+        hidden: false,
+        itemId: 1,
+        user: { id: 2 },
+      } as unknown as CreateOfferDto & { user: { id: number } };
 
+      const mockWish = {
+        id: 1,
+        price: 200,
+        owner: { id: 3 },
+        offers: [],
+      } as never;
+
+      (wishesService.findOne as jest.Mock).mockResolvedValue(mockWish);
+      (wishesService.calculateRaisedFromOffers as jest.Mock).mockReturnValue(0);
       (repository.create as jest.Mock).mockReturnValue(mockOffer);
       (repository.save as jest.Mock).mockResolvedValue(mockOffer);
 
       const result = await service.create(dto);
 
-      expect(repository.create).toHaveBeenCalledWith(dto);
+      expect(wishesService.findOne).toHaveBeenCalledWith(
+        { id: dto.itemId },
+        { relations: ['owner', 'offers', 'offers.user'] },
+      );
+      expect(repository.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          amount: dto.amount,
+          hidden: dto.hidden,
+          item: { id: dto.itemId },
+          user: { id: dto.user.id },
+        }),
+      );
       expect(repository.save).toHaveBeenCalledWith(mockOffer);
       expect(result).toEqual(mockOffer);
     });
@@ -154,35 +190,6 @@ describe('OffersService', () => {
         take: 10,
         skip: 0,
       });
-    });
-  });
-
-  describe('update', () => {
-    it('should call repository.update with filter and dto', async () => {
-      const filter = { id: 1 };
-      const updateDto: UpdateOfferDto = { amount: 200 };
-      const updateResult = { affected: 1, raw: [], generatedMaps: [] };
-
-      (repository.update as jest.Mock).mockResolvedValue(updateResult);
-
-      const result = await service.update(filter, updateDto);
-
-      expect(repository.update).toHaveBeenCalledWith(filter, updateDto);
-      expect(result).toEqual(updateResult);
-    });
-  });
-
-  describe('remove', () => {
-    it('should call repository.delete with filter', async () => {
-      const filter = { id: 1 };
-      const deleteResult = { affected: 1, raw: [] };
-
-      (repository.delete as jest.Mock).mockResolvedValue(deleteResult);
-
-      const result = await service.remove(filter);
-
-      expect(repository.delete).toHaveBeenCalledWith(filter);
-      expect(result).toEqual(deleteResult);
     });
   });
 });

@@ -7,6 +7,7 @@ import { WishesService } from '../wishes.service';
 
 import type { TestingModule } from '@nestjs/testing';
 import type { Repository } from 'typeorm';
+import type { User } from '@/users/entities/user.entity';
 import type { CreateWishDto } from '../dto/create-wish.dto';
 import type { UpdateWishDto } from '../dto/update-wish.dto';
 
@@ -64,7 +65,14 @@ describe('WishesService', () => {
 
   describe('create', () => {
     it('should create and save a wish', async () => {
-      const dto: CreateWishDto = {};
+      const dto = {
+        name: 'My wish',
+        link: 'https://example.com/product',
+        image: 'https://example.com/image.jpg',
+        price: 99.99,
+        description: 'Description',
+        owner: { id: 1 },
+      } as unknown as CreateWishDto & { owner: User };
 
       (repository.create as jest.Mock).mockReturnValue(mockWish);
       (repository.save as jest.Mock).mockResolvedValue(mockWish);

@@ -61,7 +61,7 @@ export class OffersService {
   ) {}
 
   public async create(
-    createOfferDto: CreateOfferDto & { user: User },
+    createOfferDto: CreateOfferDto & { user: { id: number } },
   ): Promise<Offer> {
     const wish = await this.wishesService.findOne(
       { id: createOfferDto.itemId },
@@ -149,7 +149,7 @@ export class OffersService {
   }: {
     wish: Wish;
     amount: number;
-    user: User;
+    user: { id: number };
   }) {
     if (wish.owner.id === user.id) {
       throw offerForOwnWishForbiddenException;
