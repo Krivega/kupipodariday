@@ -17,7 +17,7 @@ import { AuthJwtGuard } from './guards/jwt.guard';
 
 import type { AuthenticatedUser } from './decorators/currentUser.decorator';
 
-@Controller('auth')
+@Controller()
 export class AuthController {
   public constructor(
     private readonly authService: AuthService,

@@ -44,13 +44,13 @@ export class UsersController {
   public async findOwn(
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<UserProfileResponseDto> {
-    const me = await this.usersService.findOne({ id: user.id });
+    const own = await this.usersService.findOne({ id: user.id });
 
-    if (!me) {
+    if (!own) {
       throw userNotFoundException;
     }
 
-    return toUserProfileResponseDto(me);
+    return toUserProfileResponseDto(own);
   }
 
   @Patch('me')
@@ -68,16 +68,16 @@ export class UsersController {
   public async getOwnWishes(
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<UserWishesDto[]> {
-    const me = await this.usersService.findOne(
+    const own = await this.usersService.findOne(
       { id: user.id },
       { relations: ['wishes'] },
     );
 
-    if (!me) {
+    if (!own) {
       throw userNotFoundException;
     }
 
-    return me.wishes.map(toUserWishesDto);
+    return own.wishes.map(toUserWishesDto);
   }
 
   @Get(':username/wishes')
