@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsNotEmpty,
+  IsOptional,
   IsString,
   IsUrl,
   MaxLength,
@@ -21,16 +22,14 @@ export class CreateWishlistDto {
   name: string;
 
   @ApiProperty({
-    description: 'Wishlist description, string 1-1500 characters',
+    description: 'Wishlist description, string 0-1500 characters',
     example: 'A list of gifts I would love to receive.',
-    minLength: 1,
     maxLength: 1500,
   })
   @IsString()
-  @IsNotEmpty()
-  @MinLength(1)
+  @IsOptional()
   @MaxLength(1500)
-  description: string;
+  description?: string;
 
   @ApiProperty({
     description: 'Wishlist cover image url, string',

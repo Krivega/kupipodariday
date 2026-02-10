@@ -30,11 +30,10 @@ export class Wishlist {
   @MaxLength(250)
   name!: string; // название списка. Не может быть длиннее 250 символов и короче одного.
 
-  @Column()
+  @Column({ nullable: true })
   @IsString()
-  @MinLength(1)
   @MaxLength(1500)
-  description!: string; // описание подборки, строка до 1500 символов;
+  description?: string; // описание подборки, строка до 1500 символов;
 
   @Column()
   @IsUrl()

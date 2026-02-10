@@ -23,7 +23,7 @@ import type { AuthenticatedUser } from '@/auth/decorators/currentUser.decorator'
 import type { User } from '@/users/entities/user.entity';
 
 @UseGuards(AuthJwtGuard)
-@Controller('wishlists')
+@Controller('wishlistlists')
 export class WishlistsController {
   public constructor(private readonly wishlistsService: WishlistsService) {}
 
