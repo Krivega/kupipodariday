@@ -1,3 +1,6 @@
+// Load .env before AppModule so ConfigModule sees process.env
+// eslint-disable-next-line import/order -- must run before AppModule
+import '@/load-env';
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 

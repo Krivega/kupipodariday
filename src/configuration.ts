@@ -21,7 +21,7 @@ export const schema = Joi.object({
     synchronize: Joi.boolean().default(false),
   }),
   // jwt_secret для подписи JWT, обязателен для auth
-  jwt_secret: Joi.string().required(),
+  jwt_secret: Joi.string(),
 });
 
 export default function configuration() {

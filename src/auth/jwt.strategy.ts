@@ -9,16 +9,15 @@ import { unauthorizedException } from './exceptions';
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   public constructor(
-    private readonly configService: ConfigService,
+    configService: ConfigService,
     private readonly usersService: UsersService,
   ) {
     super({
       /* Указываем, что токен будет передаваться в заголовке Authorization в формате Bearer <token> */
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       /* Получаем секрет для подписи JWT токенов из конфигурации */
-      // @ts-expect-error
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      secretOrKey: this.configService.get<string>('jwt_secret')!,
+      secretOrKey: configService.get<string>('jwt_secret')!,
     });
   }
 
