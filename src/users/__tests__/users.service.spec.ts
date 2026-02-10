@@ -98,7 +98,14 @@ describe('UsersService', () => {
 
       const result = await service.create(dto);
 
-      expect(repository.create).toHaveBeenCalledWith(dto);
+      expect(repository.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          username: dto.username,
+          email: dto.email,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          password: expect.any(String),
+        }),
+      );
       expect(repository.save).toHaveBeenCalledWith(mockUser);
       expect(result).toEqual(mockUser);
     });
@@ -237,20 +244,6 @@ describe('UsersService', () => {
 
       expect(repository.update).toHaveBeenCalledWith(filter, updateDto);
       expect(result).toEqual(updateResult);
-    });
-  });
-
-  describe('remove', () => {
-    it('should call repository.delete with filter', async () => {
-      const filter = { id: 1 };
-      const deleteResult = { affected: 1, raw: [] };
-
-      (repository.delete as jest.Mock).mockResolvedValue(deleteResult);
-
-      const result = await service.remove(filter);
-
-      expect(repository.delete).toHaveBeenCalledWith(filter);
-      expect(result).toEqual(deleteResult);
     });
   });
 });

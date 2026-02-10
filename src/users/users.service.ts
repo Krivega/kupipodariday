@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, FindManyOptions, FindOptionsWhere } from 'typeorm';
+import { Repository, FindManyOptions, FindOptionsWhere, ILike } from 'typeorm';
 
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
+import { hashPassword, comparePassword } from './hashPassword';
 
 @Injectable()
 export class UsersService {
@@ -14,9 +15,46 @@ export class UsersService {
   ) {}
 
   public async create(createUserDto: CreateUserDto): Promise<User> {
-    const user = this.usersRepository.create(createUserDto);
+    const hashedPassword = await hashPassword(createUserDto.password);
+    const user = this.usersRepository.create({
+      ...createUserDto,
+      password: hashedPassword,
+    });
 
     return this.usersRepository.save(user);
+  }
+
+  public async update(
+    filter: FindOptionsWhere<User>,
+    updateUserDto: UpdateUserDto,
+  ) {
+    let data = updateUserDto;
+
+    if (updateUserDto.password !== undefined) {
+      const hashedPassword = await hashPassword(updateUserDto.password);
+
+      data = { ...updateUserDto, password: hashedPassword };
+    }
+
+    return this.usersRepository.update(filter, data);
+  }
+
+  public async findOneByCredentials({
+    username,
+    password,
+  }: {
+    username: string;
+    password: string;
+  }): Promise<User | undefined> {
+    const user = await this.findOne({ username });
+
+    if (!user) {
+      return undefined;
+    }
+
+    const isPasswordValid = await comparePassword(password, user.password);
+
+    return isPasswordValid ? user : undefined;
   }
 
   public async findOne(
@@ -36,7 +74,7 @@ export class UsersService {
   }
 
   public async findMany(
-    filter: FindOptionsWhere<User>,
+    filter: FindOptionsWhere<User> | FindOptionsWhere<User>[],
     options?: Omit<FindManyOptions<User>, 'where'>,
   ): Promise<User[]> {
     return this.usersRepository.find({
@@ -45,15 +83,18 @@ export class UsersService {
     });
   }
 
-  public async update(
-    filter: FindOptionsWhere<User>,
-    updateUserDto: UpdateUserDto,
-  ) {
-    return this.usersRepository.update(filter, updateUserDto);
-  }
+  public async searchByQuery(query: string): Promise<User[]> {
+    if (!query) {
+      return this.findMany({});
+    }
 
-  public async remove(filter: FindOptionsWhere<User>) {
-    return this.usersRepository.delete(filter);
+    const likeQuery = `%${query}%`;
+
+    return this.findMany([
+      { username: ILike(likeQuery) },
+      { email: ILike(likeQuery) },
+      { about: ILike(likeQuery) },
+    ]);
   }
 
   /** Увеличивает tokenVersion пользователя — инвалидирует все выданные ему JWT */

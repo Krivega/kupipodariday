@@ -14,12 +14,12 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
    * Passport-local передаёт в validate два аргумента: username и password (из тела запроса).
    */
   public async validate(username: string, password: string) {
-    const user = await this.authService.validatePassword({
+    const user = await this.authService.findOneByCredentials({
       username,
       password,
     });
 
-    if (!user) {
+    if (user === undefined) {
       throw new UnauthorizedException();
     }
 

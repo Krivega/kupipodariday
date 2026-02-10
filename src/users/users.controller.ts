@@ -1,14 +1,17 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
+  Controller,
+  ForbiddenException,
+  Get,
+  NotFoundException,
   Param,
-  Delete,
+  Patch,
+  Query,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 
-import { CreateUserDto } from './dto/create-user.dto';
+import { AuthJwtGuard } from '@/auth/guards/jwt.guard';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersService } from './users.service';
 
@@ -16,31 +19,46 @@ import { UsersService } from './users.service';
 export class UsersController {
   public constructor(private readonly usersService: UsersService) {}
 
-  @Post()
-  public async create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  @Get('find')
+  public async find(@Query('query') query: string) {
+    return this.usersService.searchByQuery(query);
   }
 
-  @Get()
-  public async findAll() {
-    return this.usersService.findMany({});
+  @Get(':username')
+  public async findOne(@Param('username') username: string) {
+    return this.usersService.findOne({ username });
   }
 
-  @Get(':id')
-  public async findOne(@Param('id') id: string) {
-    return this.usersService.findOne({ id: Number(id) });
+  @UseGuards(AuthJwtGuard)
+  @Get('me')
+  public async getMe(@Req() req: Request) {
+    const { user } = req;
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return this.usersService.findOne({ id: user.id });
   }
 
-  @Patch(':id')
-  public async update(
-    @Param('id') id: string,
+  @UseGuards(AuthJwtGuard)
+  @Patch('me')
+  public async updateMe(
+    @Req() req: Request,
     @Body() updateUserDto: UpdateUserDto,
   ) {
-    return this.usersService.update({ id: Number(id) }, updateUserDto);
-  }
+    const { user } = req;
 
-  @Delete(':id')
-  public async remove(@Param('id') id: string) {
-    return this.usersService.remove({ id: Number(id) });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const id = Number(user.id);
+
+    if (!Number.isFinite(id)) {
+      throw new ForbiddenException('Invalid user identifier');
+    }
+
+    return this.usersService.update({ id }, updateUserDto);
   }
 }

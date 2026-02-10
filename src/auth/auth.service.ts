@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import bcrypt from 'bcryptjs';
 
 import { CreateUserDto } from '@/users/dto/create-user.dto';
 import { UsersService } from '@/users/users.service';
@@ -13,11 +12,7 @@ export class AuthService {
   ) {}
 
   public async signup(createUserDto: CreateUserDto) {
-    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
-    const user = await this.usersService.create({
-      ...createUserDto,
-      password: hashedPassword,
-    });
+    const user = await this.usersService.create(createUserDto);
 
     return this.auth(user);
   }
@@ -36,25 +31,16 @@ export class AuthService {
     await this.usersService.incrementTokenVersion(userId);
   }
 
-  public async validatePassword({
+  public async findOneByCredentials({
     username,
     password,
   }: {
     username: string;
     password: string;
   }) {
-    const user = await this.usersService.findOne({ username });
-
-    if (!user) {
-      return undefined;
-    }
-
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-
-    if (isPasswordValid) {
-      return user;
-    }
-
-    return undefined;
+    return this.usersService.findOneByCredentials({
+      username,
+      password,
+    });
   }
 }
