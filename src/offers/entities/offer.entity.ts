@@ -24,8 +24,8 @@ export class Offer {
 
   @Column('decimal', { precision: 10, scale: 2, default: 0 })
   @IsNumber({ maxDecimalPlaces: 2 })
-  @Min(0)
-  amount = 0; // сумма заявки, округляется до двух знаков после запятой;
+  @Min(1)
+  amount!: number; // сумма заявки, округляется до двух знаков после запятой;
 
   @Column({ default: false })
   @IsBoolean()
