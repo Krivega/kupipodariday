@@ -30,7 +30,7 @@ interface IDatabaseConfig {
           username: databaseConfig.username,
           password: databaseConfig.password,
           database: databaseConfig.name,
-          entities: [],
+          autoLoadEntities: true,
           synchronize: databaseConfig.synchronize,
         };
       },

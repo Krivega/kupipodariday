@@ -27,7 +27,7 @@ export class Offer {
   @Min(1)
   amount!: number; // сумма заявки, округляется до двух знаков после запятой;
 
-  @Column({ default: false })
+  @Column({ type: 'boolean', default: false })
   @IsBoolean()
   hidden = false; // флаг, который определяет показывать ли информацию о скидывающемся пользователе в списке. По умолчанию равен false.
 
