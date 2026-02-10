@@ -1,15 +1,6 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Param } from '@nestjs/common';
 
 import { CreateOfferDto } from './dto/create-offer.dto';
-import { UpdateOfferDto } from './dto/update-offer.dto';
 import { OffersService } from './offers.service';
 
 @Controller('offers')
@@ -29,18 +20,5 @@ export class OffersController {
   @Get(':id')
   public async findOne(@Param('id') id: string) {
     return this.offersService.findOne({ id: Number(id) });
-  }
-
-  @Patch(':id')
-  public async update(
-    @Param('id') id: string,
-    @Body() updateOfferDto: UpdateOfferDto,
-  ) {
-    return this.offersService.update({ id: Number(id) }, updateOfferDto);
-  }
-
-  @Delete(':id')
-  public async remove(@Param('id') id: string) {
-    return this.offersService.remove({ id: Number(id) });
   }
 }

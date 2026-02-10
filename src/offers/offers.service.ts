@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindManyOptions, FindOptionsWhere } from 'typeorm';
 
 import { CreateOfferDto } from './dto/create-offer.dto';
-import { UpdateOfferDto } from './dto/update-offer.dto';
 import { Offer } from './entities/offer.entity';
 
 @Injectable()
@@ -37,13 +36,6 @@ export class OffersService {
       ...options,
       where: filter,
     });
-  }
-
-  public async update(
-    filter: FindOptionsWhere<Offer>,
-    updateOfferDto: UpdateOfferDto,
-  ) {
-    return this.usersRepository.update(filter, updateOfferDto);
   }
 
   public async remove(filter: FindOptionsWhere<Offer>) {
