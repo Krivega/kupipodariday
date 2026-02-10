@@ -10,7 +10,7 @@ import {
 
 import { CurrentUser } from '@/auth/decorators/currentUser.decorator';
 import { AuthJwtGuard } from '@/auth/guards/jwt.guard';
-import { FindUserDto } from './dto/find-user.dto';
+import { FindUsersDto } from './dto/find-users.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { userNotFoundException } from './exceptions';
 import { UsersService } from './users.service';
@@ -23,17 +23,17 @@ export class UsersController {
   public constructor(private readonly usersService: UsersService) {}
 
   @Post('find')
-  public async find(@Body() findUserDto: FindUserDto) {
-    return this.usersService.searchByQuery(findUserDto.query);
+  public async findMany(@Body() findUsersDto: FindUsersDto) {
+    return this.usersService.searchByQuery(findUsersDto.query);
   }
 
   @Get('me')
-  public async getMe(@CurrentUser() user: AuthenticatedUser) {
+  public async findOwn(@CurrentUser() user: AuthenticatedUser) {
     return this.usersService.findOne({ id: user.id });
   }
 
   @Patch('me')
-  public async updateMe(
+  public async update(
     @CurrentUser() user: AuthenticatedUser,
     @Body() updateUserDto: UpdateUserDto,
   ) {
@@ -43,7 +43,7 @@ export class UsersController {
   }
 
   @Get('me/wishes')
-  public async getMeWishes(@CurrentUser() user: AuthenticatedUser) {
+  public async getOwnWishes(@CurrentUser() user: AuthenticatedUser) {
     const me = await this.usersService.findOne(
       { id: user.id },
       { relations: ['wishes'] },

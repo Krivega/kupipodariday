@@ -5,6 +5,7 @@ import { Repository, FindManyOptions, FindOptionsWhere, ILike } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
+import { userNotFoundException } from './exceptions';
 import { hashPassword, comparePassword } from './hashPassword';
 
 @Injectable()
@@ -27,7 +28,7 @@ export class UsersService {
   public async update(
     filter: FindOptionsWhere<User>,
     updateUserDto: UpdateUserDto,
-  ) {
+  ): Promise<User> {
     let data = updateUserDto;
 
     if (updateUserDto.password !== undefined) {
@@ -36,7 +37,15 @@ export class UsersService {
       data = { ...updateUserDto, password: hashedPassword };
     }
 
-    return this.usersRepository.update(filter, data);
+    await this.usersRepository.update(filter, data);
+
+    const user = await this.findOne(filter);
+
+    if (!user) {
+      throw userNotFoundException;
+    }
+
+    return user;
   }
 
   public async findOneByCredentials({
