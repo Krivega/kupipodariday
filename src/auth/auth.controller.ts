@@ -3,18 +3,19 @@ import {
   Post,
   Body,
   UseGuards,
-  Req,
   HttpCode,
   HttpStatus,
-  UnauthorizedException,
-  ConflictException,
 } from '@nestjs/common';
 
 import { CreateUserDto } from '@/users/dto/create-user.dto';
+import { userAlreadyExistsException } from '@/users/exceptions';
 import { UsersService } from '@/users/users.service';
 import { AuthService } from './auth.service';
+import { CurrentUser } from './decorators/currentUser.decorator';
 import { AuthLocalGuard } from './guards/auth.guard';
 import { AuthJwtGuard } from './guards/jwt.guard';
+
+import type { AuthenticatedUser } from './decorators/currentUser.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -29,13 +30,7 @@ export class AuthController {
    */
   @UseGuards(AuthLocalGuard)
   @Post('signin')
-  public async signin(@Req() req: Request) {
-    const { user } = req;
-
-    if (user === undefined) {
-      throw new UnauthorizedException();
-    }
-
+  public async signin(@CurrentUser() user: AuthenticatedUser) {
     /* Генерируем для пользователя JWT-токен (в payload — tokenVersion для инвалидации при выходе) */
     return this.authService.auth({
       id: user.id,
@@ -50,13 +45,7 @@ export class AuthController {
   @UseGuards(AuthJwtGuard)
   @Post('signout')
   @HttpCode(HttpStatus.NO_CONTENT)
-  public async signout(@Req() req: Request): Promise<void> {
-    const { user } = req;
-
-    if (user === undefined) {
-      throw new UnauthorizedException();
-    }
-
+  public async signout(@CurrentUser() user: AuthenticatedUser): Promise<void> {
     await this.authService.signout(user.id);
   }
 
@@ -68,7 +57,7 @@ export class AuthController {
     ]);
 
     if (isUserExistsByUsernameOrEmail) {
-      throw new ConflictException('User already exists');
+      throw userAlreadyExistsException;
     }
 
     return this.authService.signup(createUserDto);

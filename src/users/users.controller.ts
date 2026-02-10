@@ -2,18 +2,20 @@ import {
   Body,
   Controller,
   Get,
-  NotFoundException,
   Param,
   Patch,
-  Req,
   UseGuards,
   Post,
 } from '@nestjs/common';
 
+import { CurrentUser } from '@/auth/decorators/currentUser.decorator';
 import { AuthJwtGuard } from '@/auth/guards/jwt.guard';
 import { FindUserDto } from './dto/find-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { userNotFoundException } from './exceptions';
 import { UsersService } from './users.service';
+
+import type { AuthenticatedUser } from '@/auth/decorators/currentUser.decorator';
 
 @UseGuards(AuthJwtGuard)
 @Controller('users')
@@ -26,47 +28,29 @@ export class UsersController {
   }
 
   @Get('me')
-  public async getMe(@Req() req: Request) {
-    const { user } = req;
-
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-
+  public async getMe(@CurrentUser() user: AuthenticatedUser) {
     return this.usersService.findOne({ id: user.id });
   }
 
   @Patch('me')
   public async updateMe(
-    @Req() req: Request,
+    @CurrentUser() user: AuthenticatedUser,
     @Body() updateUserDto: UpdateUserDto,
   ) {
-    const { user } = req;
-
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-
     const id = Number(user.id);
 
     return this.usersService.update({ id }, updateUserDto);
   }
 
   @Get('me/wishes')
-  public async getMeWishes(@Req() req: Request) {
-    const { user } = req;
-
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-
+  public async getMeWishes(@CurrentUser() user: AuthenticatedUser) {
     const me = await this.usersService.findOne(
       { id: user.id },
       { relations: ['wishes'] },
     );
 
     if (!me) {
-      throw new NotFoundException('User not found');
+      throw userNotFoundException;
     }
 
     return me.wishes;
@@ -80,7 +64,7 @@ export class UsersController {
     );
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw userNotFoundException;
     }
 
     return user.wishes;
@@ -91,7 +75,7 @@ export class UsersController {
     const user = await this.usersService.findOne({ username });
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw userNotFoundException;
     }
 
     return user;
