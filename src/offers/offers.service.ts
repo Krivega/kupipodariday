@@ -30,7 +30,7 @@ export class OffersService {
   }
 
   public async findMany(
-    filter: FindOptionsWhere<Offer>,
+    filter?: FindOptionsWhere<Offer>,
     options?: Omit<FindManyOptions<Offer>, 'where'>,
   ): Promise<Offer[]> {
     return this.usersRepository.find({

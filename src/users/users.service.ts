@@ -74,7 +74,7 @@ export class UsersService {
   }
 
   public async findMany(
-    filter: FindOptionsWhere<User> | FindOptionsWhere<User>[],
+    filter?: FindOptionsWhere<User> | FindOptionsWhere<User>[],
     options?: Omit<FindManyOptions<User>, 'where'>,
   ): Promise<User[]> {
     return this.usersRepository.find({
@@ -85,7 +85,7 @@ export class UsersService {
 
   public async searchByQuery(query: string): Promise<User[]> {
     if (!query) {
-      return this.findMany({});
+      return this.findMany();
     }
 
     const likeQuery = `%${query}%`;

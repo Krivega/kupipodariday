@@ -23,7 +23,7 @@ export class OffersController {
 
   @Get()
   public async findAll() {
-    return this.offersService.findMany({});
+    return this.offersService.findMany();
   }
 
   @Get(':id')

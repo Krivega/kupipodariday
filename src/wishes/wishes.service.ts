@@ -13,32 +13,32 @@ import type { User } from '@/users/entities/user.entity';
 export class WishesService {
   public constructor(
     @InjectRepository(Wish)
-    private readonly usersRepository: Repository<Wish>,
+    private readonly wishRepository: Repository<Wish>,
   ) {}
 
   public async create(
     createWishDto: CreateWishDto & { owner: User },
   ): Promise<Wish> {
-    const wish = this.usersRepository.create(createWishDto);
+    const wish = this.wishRepository.create(createWishDto);
 
-    return this.usersRepository.save(wish);
+    return this.wishRepository.save(wish);
   }
 
   public async findOne(
     filter: FindOptionsWhere<Wish>,
     options?: Omit<FindManyOptions<Wish>, 'where'>,
   ): Promise<Wish | null> {
-    return this.usersRepository.findOne({
+    return this.wishRepository.findOne({
       ...options,
       where: filter,
     });
   }
 
   public async findMany(
-    filter: FindOptionsWhere<Wish>,
+    filter?: FindOptionsWhere<Wish>,
     options?: Omit<FindManyOptions<Wish>, 'where'>,
   ): Promise<Wish[]> {
-    return this.usersRepository.find({
+    return this.wishRepository.find({
       ...options,
       where: filter,
     });
@@ -46,13 +46,32 @@ export class WishesService {
 
   public async update(
     filter: FindOptionsWhere<Wish>,
-    updateWishDto: UpdateWishDto,
+    updateWishDto: UpdateWishDto & { copied?: number },
   ) {
-    return this.usersRepository.update(filter, updateWishDto);
+    return this.wishRepository.update(filter, updateWishDto);
+  }
+
+  public async copy({ id, userId }: { id: number; userId: number }) {
+    const wish = await this.findOne({ id: Number(id) });
+
+    if (!wish) {
+      return undefined;
+    }
+
+    await this.update({ id: Number(id) }, { copied: wish.copied + 1 });
+
+    return this.create({
+      name: wish.name,
+      link: wish.link,
+      image: wish.image,
+      price: wish.price,
+      description: wish.description,
+      owner: { id: userId } as User,
+    });
   }
 
   public async remove(filter: FindOptionsWhere<Wish>) {
-    return this.usersRepository.delete(filter);
+    return this.wishRepository.delete(filter);
   }
 
   /**
@@ -72,7 +91,7 @@ export class WishesService {
    */
   public buildWishViewForUser(wish: Wish, currentUserId: number) {
     const isOwner = wish.owner.id === currentUserId;
-    const raised = this.calculateRaisedFromOffers(wish.offers as Offer[]);
+    const raised = this.calculateRaisedFromOffers(wish.offers);
 
     const mapUser = (u: User) => {
       return {

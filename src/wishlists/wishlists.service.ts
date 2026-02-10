@@ -6,34 +6,38 @@ import { CreateWishlistDto } from './dto/create-wishlist.dto';
 import { UpdateWishlistDto } from './dto/update-wishlist.dto';
 import { Wishlist } from './entities/wishlist.entity';
 
+import type { User } from '@/users/entities/user.entity';
+
 @Injectable()
 export class WishlistsService {
   public constructor(
     @InjectRepository(Wishlist)
-    private readonly usersRepository: Repository<Wishlist>,
+    private readonly wishListRepository: Repository<Wishlist>,
   ) {}
 
-  public async create(createWishlistDto: CreateWishlistDto): Promise<Wishlist> {
-    const wishlist = this.usersRepository.create(createWishlistDto);
+  public async create(
+    createWishlistDto: CreateWishlistDto & { owner: User },
+  ): Promise<Wishlist> {
+    const wishlist = this.wishListRepository.create(createWishlistDto);
 
-    return this.usersRepository.save(wishlist);
+    return this.wishListRepository.save(wishlist);
   }
 
   public async findOne(
     filter: FindOptionsWhere<Wishlist>,
     options?: Omit<FindManyOptions<Wishlist>, 'where'>,
   ): Promise<Wishlist | null> {
-    return this.usersRepository.findOne({
+    return this.wishListRepository.findOne({
       ...options,
       where: filter,
     });
   }
 
   public async findMany(
-    filter: FindOptionsWhere<Wishlist>,
+    filter?: FindOptionsWhere<Wishlist>,
     options?: Omit<FindManyOptions<Wishlist>, 'where'>,
   ): Promise<Wishlist[]> {
-    return this.usersRepository.find({
+    return this.wishListRepository.find({
       ...options,
       where: filter,
     });
@@ -43,10 +47,10 @@ export class WishlistsService {
     filter: FindOptionsWhere<Wishlist>,
     updateWishlistDto: UpdateWishlistDto,
   ) {
-    return this.usersRepository.update(filter, updateWishlistDto);
+    return this.wishListRepository.update(filter, updateWishlistDto);
   }
 
   public async remove(filter: FindOptionsWhere<Wishlist>) {
-    return this.usersRepository.delete(filter);
+    return this.wishListRepository.delete(filter);
   }
 }

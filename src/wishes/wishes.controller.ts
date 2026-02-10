@@ -136,20 +136,16 @@ export class WishesController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
   ) {
-    const wish = await this.wishesService.findOne({ id: Number(id) });
+    const wish = await this.wishesService.copy({
+      id: Number(id),
+      userId: user.id,
+    });
 
     if (!wish) {
       throw wishNotFoundException;
     }
 
-    return this.wishesService.create({
-      name: wish.name,
-      link: wish.link,
-      image: wish.image,
-      price: wish.price,
-      description: wish.description,
-      owner: { id: user.id } as User,
-    });
+    return wish;
   }
 
   @UseGuards(AuthJwtGuard)
