@@ -87,13 +87,17 @@ export class WishesController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update wish' })
-  @ApiResponse({ status: 200, description: 'Wish updated' })
+  @ApiResponse({
+    status: 200,
+    description: 'Updated wish',
+    type: WishResponseDto,
+  })
   public async update(
     @CurrentUser() user: AuthenticatedUser,
     @Param() params: WishIdParameterDto,
     @Body() updateWishDto: UpdateWishDto,
-  ): Promise<void> {
-    await this.wishPresenter.update(params.id, user.id, updateWishDto);
+  ): Promise<WishResponseDto> {
+    return this.wishPresenter.update(params.id, user.id, updateWishDto);
   }
 
   @Delete(':id')

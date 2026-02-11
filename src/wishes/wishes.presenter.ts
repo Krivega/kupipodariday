@@ -115,7 +115,7 @@ export class WishesPresenter {
     id: number,
     userId: number,
     updateWishDto: UpdateWishDto,
-  ): Promise<void> {
+  ): Promise<WishResponseDto> {
     const wish = await this.findOneForOwnerCheck(id);
 
     if (!wish) {
@@ -131,6 +131,17 @@ export class WishesPresenter {
     }
 
     await this.wishesService.updateWishEntity({ id }, updateWishDto);
+
+    const fullWish = await this.wishesService.findOneWishEntity(
+      { id },
+      { relations: [...WISH_VIEW_RELATIONS] },
+    );
+
+    if (!fullWish) {
+      throw wishNotFoundException;
+    }
+
+    return this.buildWishView(fullWish, userId);
   }
 
   public async remove(id: number, userId: number): Promise<WishResponseDto> {
