@@ -37,10 +37,8 @@ export class WishlistsController {
     description: 'List of wishlists',
     type: [WishlistResponseDto],
   })
-  public async findAll(
-    @CurrentUser() user: AuthenticatedUser,
-  ): Promise<WishlistResponseDto[]> {
-    return this.wishlistPresenter.findManyForView(user.id);
+  public async findAll(): Promise<WishlistResponseDto[]> {
+    return this.wishlistPresenter.findManyForView();
   }
 
   @Post()
@@ -69,13 +67,9 @@ export class WishlistsController {
     type: WishlistResponseDto,
   })
   public async findOne(
-    @CurrentUser() user: AuthenticatedUser,
     @Param() params: WishlistIdParameterDto,
   ): Promise<WishlistResponseDto> {
-    const wishlist = await this.wishlistPresenter.findOneForView(
-      params.id,
-      user.id,
-    );
+    const wishlist = await this.wishlistPresenter.findOneForView(params.id);
 
     if (wishlist === undefined) {
       throw wishlistNotFoundException;

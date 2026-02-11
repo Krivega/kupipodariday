@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/class-methods-use-this */
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { DataSource, EntityManager } from 'typeorm';
 
 import {
   offerAlreadyFundedException,
@@ -9,6 +10,7 @@ import {
 } from '@/offers/exceptions';
 import { UsersPresenter } from '@/users/users.presenter';
 import { WishesPresenter } from '@/wishes/wishes.presenter';
+import { WishesService } from '@/wishes/wishes.service';
 import { CreateOfferDto } from './dto/create-offer.dto';
 import { OffersService } from './offers.service';
 
@@ -20,6 +22,7 @@ const OFFER_VIEW_RELATIONS = ['user', 'item'] as const;
 
 @Injectable()
 export class OffersPresenter {
+  /* eslint-disable @typescript-eslint/max-params */
   public constructor(
     private readonly offersService: OffersService,
     @Inject(
@@ -28,8 +31,11 @@ export class OffersPresenter {
       }),
     )
     private readonly wishPresenter: WishesPresenter,
+    private readonly wishesService: WishesService,
     private readonly userPresenter: UsersPresenter,
+    private readonly dataSource: DataSource,
   ) {}
+  /* eslint-enable @typescript-eslint/max-params */
 
   public async findManyForView(
     currentUserId: number,
@@ -63,7 +69,23 @@ export class OffersPresenter {
   ): Promise<OfferResponseDto> {
     const wish = await this.validateCreateOffer(createOfferDto);
     const offer = this.offersService.createOfferEntity(createOfferDto, wish);
-    const saved = await this.offersService.saveOfferEntity(offer);
+
+    const saved = await this.dataSource.transaction(
+      async (manager: EntityManager) => {
+        const savedOffer = await this.offersService.saveOfferEntity(
+          offer,
+          manager,
+        );
+
+        await this.wishesService.incrementWishRaised(
+          wish.id,
+          createOfferDto.amount,
+          manager,
+        );
+
+        return savedOffer;
+      },
+    );
 
     const fullOffer = await this.offersService.findOneOfferEntity(
       { id: saved.id },
@@ -98,13 +120,6 @@ export class OffersPresenter {
     };
   }
 
-  public calculateRaised(
-    offers: Offer[] | undefined,
-    currentUserId: number,
-  ): number {
-    return this.calculateRaisedFromOffers(offers, currentUserId);
-  }
-
   private async validateCreateOffer(
     createOfferDto: CreateOfferDto & { user: { id: number } },
   ): Promise<Wish> {
@@ -134,13 +149,13 @@ export class OffersPresenter {
       throw offerForOwnWishForbiddenException;
     }
 
-    const raised = this.calculateRaisedFromOffers(wish.offers, user.id);
+    const raised = Number(wish.raised);
 
-    if (raised >= wish.price) {
+    if (raised >= Number(wish.price)) {
       throw offerAlreadyFundedException;
     }
 
-    if (raised + amount > wish.price) {
+    if (raised + amount > Number(wish.price)) {
       throw offerAmountTooBigException;
     }
   }
@@ -159,17 +174,5 @@ export class OffersPresenter {
     return (offers ?? []).filter((offer) => {
       return this.hasVisibleOffer(offer, currentUserId);
     });
-  }
-
-  /**
-   * Sum of amounts from offers visible to the current user.
-   */
-  private calculateRaisedFromOffers(
-    offers: Offer[] | undefined,
-    currentUserId: number,
-  ): number {
-    return this.getVisibleOffers(offers, currentUserId).reduce((sum, offer) => {
-      return sum + Number(offer.amount);
-    }, 0);
   }
 }

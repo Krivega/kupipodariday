@@ -1,6 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, FindManyOptions, FindOptionsWhere } from 'typeorm';
+import {
+  Repository,
+  FindManyOptions,
+  FindOptionsWhere,
+  EntityManager,
+} from 'typeorm';
 
 import { CreateOfferDto } from './dto/create-offer.dto';
 import { Offer } from './entities/offer.entity';
@@ -46,7 +51,11 @@ export class OffersService {
     });
   }
 
-  public async saveOfferEntity(offer: Offer): Promise<Offer> {
-    return this.offersRepository.save(offer);
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
+  public async saveOfferEntity(
+    offer: Offer,
+    manager: EntityManager,
+  ): Promise<Offer> {
+    return manager.getRepository(Offer).save(offer);
   }
 }

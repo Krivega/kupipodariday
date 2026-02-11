@@ -63,18 +63,13 @@ export class UsersPresenter {
   }
 
   public buildWishResponse(wish: Wish, currentUserId: number): WishResponseDto {
-    const raised = this.offerPresenter.calculateRaised(
-      wish.offers,
-      currentUserId,
-    );
-
     return {
       id: wish.id,
       name: wish.name,
       link: wish.link,
       image: wish.image,
       price: wish.price,
-      raised,
+      raised: Number(wish.raised),
       copied: wish.copied,
       description: wish.description,
       createdAt: wish.createdAt,
@@ -86,11 +81,6 @@ export class UsersPresenter {
 
   public toWishes(wishes: Wish[], currentUserId: number): UserWishesDto[] {
     return wishes.map((wish) => {
-      const raised = this.offerPresenter.calculateRaised(
-        wish.offers,
-        currentUserId,
-      );
-
       return {
         id: wish.id,
         createdAt: wish.createdAt,
@@ -99,7 +89,7 @@ export class UsersPresenter {
         link: wish.link,
         image: wish.image,
         price: Number(wish.price),
-        raised,
+        raised: Number(wish.raised),
         copied: wish.copied,
         description: wish.description,
         offers: this.offerPresenter.buildOffersView(wish.offers, currentUserId),

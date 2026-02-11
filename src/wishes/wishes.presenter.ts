@@ -205,7 +205,7 @@ export class WishesPresenter {
   }
 
   public buildWishView(wish: Wish, currentUserId: number): WishResponseDto {
-    const wishPartialView = this.buildWishPartialView(wish, currentUserId);
+    const wishPartialView = this.buildWishPartialView(wish);
 
     return {
       ...wishPartialView,
@@ -214,15 +214,8 @@ export class WishesPresenter {
     };
   }
 
-  public buildWishPartialView(
-    wish: Wish,
-    currentUserId: number,
-  ): WishPartialDto {
-    const raised = this.offerPresenter.calculateRaised(
-      wish.offers,
-      currentUserId,
-    );
-
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
+  public buildWishPartialView(wish: Wish): WishPartialDto {
     return {
       id: wish.id,
       createdAt: wish.createdAt,
@@ -231,7 +224,7 @@ export class WishesPresenter {
       link: wish.link,
       image: wish.image,
       price: Number(wish.price),
-      raised,
+      raised: Number(wish.raised),
       copied: wish.copied,
       description: wish.description,
     };

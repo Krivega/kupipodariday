@@ -31,9 +31,7 @@ export class WishlistsPresenter {
     private readonly wishlistsService: WishlistsService,
   ) {}
 
-  public async findManyForView(
-    currentUserId: number,
-  ): Promise<WishlistResponseDto[]> {
+  public async findManyForView(): Promise<WishlistResponseDto[]> {
     const wishlists = await this.wishlistsService.findManyWishlistEntity(
       {},
       {
@@ -42,13 +40,12 @@ export class WishlistsPresenter {
     );
 
     return wishlists.map((wishlist) => {
-      return this.buildWishlistView(wishlist, currentUserId);
+      return this.buildWishlistView(wishlist);
     });
   }
 
   public async findOneForView(
     id: number,
-    currentUserId: number,
   ): Promise<WishlistResponseDto | undefined> {
     const wishlist = await this.wishlistsService.findOneWishlistEntity(
       { id },
@@ -59,7 +56,7 @@ export class WishlistsPresenter {
       return undefined;
     }
 
-    return this.buildWishlistView(wishlist, currentUserId);
+    return this.buildWishlistView(wishlist);
   }
 
   public async findOneForOwnerCheck(id: number): Promise<Wishlist | null> {
@@ -96,7 +93,7 @@ export class WishlistsPresenter {
       throw wishlistNotFoundException;
     }
 
-    return this.buildWishlistView(result, createWishlistDto.owner.id);
+    return this.buildWishlistView(result);
   }
 
   public async update(
@@ -125,7 +122,7 @@ export class WishlistsPresenter {
       throw wishlistNotFoundException;
     }
 
-    return this.buildWishlistView(updated, userId);
+    return this.buildWishlistView(updated);
   }
 
   public async remove(
@@ -151,17 +148,14 @@ export class WishlistsPresenter {
       throw wishlistNotFoundException;
     }
 
-    const view = this.buildWishlistView(fullWishlist, userId);
+    const view = this.buildWishlistView(fullWishlist);
 
     await this.wishlistsService.removeWishlistEntity({ id });
 
     return view;
   }
 
-  public buildWishlistView(
-    wishlist: Wishlist,
-    currentUserId: number,
-  ): WishlistResponseDto {
+  public buildWishlistView(wishlist: Wishlist): WishlistResponseDto {
     return {
       id: wishlist.id,
       createdAt: wishlist.createdAt,
@@ -171,7 +165,7 @@ export class WishlistsPresenter {
       image: wishlist.image,
       owner: this.userPresenter.toPublicProfile(wishlist.owner),
       items: wishlist.items.map((item) => {
-        return this.wishPresenter.buildWishPartialView(item, currentUserId);
+        return this.wishPresenter.buildWishPartialView(item);
       }),
     };
   }
