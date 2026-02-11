@@ -324,7 +324,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/Wishlist'
       tags:
-        - wishlistlists              
+        - wishlistlists
     post:
       operationId: WishlistsController_create
       parameters: []
@@ -848,26 +848,26 @@ components:
     CreateWishlistDto:
       type: object
       properties:
-        name: 
+        name:
           type: string
-          example: "Мой вишлист"
+          example: 'Мой вишлист'
         image:
           type: string
-          example: "https://i.pravatar.cc/150?img=3"
+          example: 'https://i.pravatar.cc/150?img=3'
         itemsId:
           type: array
           items:
             type: number
           example: [1]
     UpdateWishlistDto:
-       type: object
-       properties:
-        name: 
+      type: object
+      properties:
+        name:
           type: string
-          example: "Мой вишлист"
+          example: 'Мой вишлист'
         image:
           type: string
-          example: "https://i.pravatar.cc/150?img=3"
+          example: 'https://i.pravatar.cc/150?img=3'
         itemsId:
           type: array
           items:
