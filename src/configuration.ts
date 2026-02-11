@@ -24,6 +24,12 @@ export const schema = Joi.object({
   jwt_secret: Joi.string(),
   // jwt_expires_in — время жизни access token (например: 15m, 1h, 7d)
   jwt_expires_in: Joi.string().default('7d'),
+  // cors.origins — разрешённые origin для CORS (список через запятую в CORS_ORIGINS)
+  cors: Joi.object({
+    origins: Joi.array()
+      .items(Joi.string())
+      .default(['http://localhost:3000', 'http://127.0.0.1:3000']),
+  }).default(),
 });
 
 export default function configuration() {
@@ -42,5 +48,15 @@ export default function configuration() {
     },
     jwt_secret: process.env.JWT_SECRET,
     jwt_expires_in: process.env.JWT_EXPIRES_IN ?? '7d',
+    cors: {
+      origins:
+        process.env.CORS_ORIGINS === undefined
+          ? ['http://localhost:3000', 'http://127.0.0.1:3000']
+          : process.env.CORS_ORIGINS.split(',')
+              .map((s) => {
+                return s.trim();
+              })
+              .filter(Boolean),
+    },
   };
 }

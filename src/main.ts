@@ -20,12 +20,16 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
 
+  const configService = app.get(ConfigService);
+  const corsOrigins = configService.get<string[]>('cors.origins') ?? [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+  ];
+
   app.enableCors({
-    origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+    origin: corsOrigins,
     credentials: true,
   });
-
-  const configService = app.get(ConfigService);
 
   await app.listen(configService.get('port') ?? 3000);
 }
