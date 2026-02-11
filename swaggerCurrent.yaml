@@ -22,6 +22,12 @@ paths:
       responses:
         "201":
           description: List of found users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserProfileResponseDto"
       summary: Search users by query
       tags: &a1
         - users
@@ -32,6 +38,10 @@ paths:
       responses:
         "200":
           description: Current user profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfileResponseDto"
       summary: Get current user profile
       tags: *a1
     patch:
@@ -46,6 +56,10 @@ paths:
       responses:
         "200":
           description: Updated user profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfileResponseDto"
         "400":
           description: Ошибка валидации переданных значений
       summary: Update current user profile
@@ -105,6 +119,10 @@ paths:
       responses:
         "200":
           description: User public profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserPublicProfileResponseDto"
       summary: Get public profile by username
       tags: *a1
   /offers:
@@ -468,34 +486,6 @@ components:
           example: some@ya.ru
       required:
         - query
-    UpdateUserDto:
-      type: object
-      properties:
-        username:
-          type: string
-          description: Username, unique string 2-30 characters
-          example: johndoe
-          minLength: 2
-          maxLength: 30
-        about:
-          type: string
-          description: About user, string 2-200 characters
-          example: Пока ничего не рассказал о себе
-          minLength: 2
-          maxLength: 200
-        avatar:
-          type: string
-          description: Avatar URL
-          example: https://i.pravatar.cc/300
-        email:
-          type: string
-          description: User email, must be unique
-          example: test@example.com
-        password:
-          type: string
-          description: User password, min 6 characters
-          example: secret123
-          minLength: 6
     UserProfileResponseDto:
       type: object
       properties:
@@ -532,6 +522,66 @@ components:
         - about
         - avatar
         - email
+    UpdateUserDto:
+      type: object
+      properties:
+        username:
+          type: string
+          description: Username, unique string 2-30 characters
+          example: johndoe
+          minLength: 2
+          maxLength: 30
+        about:
+          type: string
+          description: About user, string 2-200 characters
+          example: Пока ничего не рассказал о себе
+          minLength: 2
+          maxLength: 200
+        avatar:
+          type: string
+          description: Avatar URL
+          example: https://i.pravatar.cc/300
+        email:
+          type: string
+          description: User email, must be unique
+          example: test@example.com
+        password:
+          type: string
+          description: User password, min 6 characters
+          example: secret123
+          minLength: 6
+    UserPublicProfileResponseDto:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 1
+        createdAt:
+          format: date-time
+          type: string
+        updatedAt:
+          format: date-time
+          type: string
+        username:
+          type: string
+          example: johndoe
+          minLength: 2
+          maxLength: 30
+        about:
+          type: string
+          example: Пока ничего не рассказал о себе
+          minLength: 2
+          maxLength: 200
+        avatar:
+          type: string
+          example: https://i.pravatar.cc/300
+      required:
+        - id
+        - createdAt
+        - updatedAt
+        - username
+        - about
+        - avatar
     WishResponseDto:
       type: object
       properties:
@@ -550,7 +600,12 @@ components:
         price:
           type: number
           example: 99.99
+          minimum: 1
         raised:
+          type: number
+          example: 0
+          minimum: 1
+        copied:
           type: number
           example: 0
         description:
@@ -563,7 +618,7 @@ components:
           format: date-time
           type: string
         owner:
-          $ref: "#/components/schemas/UserProfileResponseDto"
+          $ref: "#/components/schemas/UserPublicProfileResponseDto"
         offers:
           type: array
           items:
@@ -575,6 +630,7 @@ components:
         - image
         - price
         - raised
+        - copied
         - description
         - createdAt
         - updatedAt
@@ -611,6 +667,7 @@ components:
         - amount
         - hidden
         - item
+        - user
     UserWishesDto:
       type: object
       properties:
@@ -730,38 +787,6 @@ components:
           type: number
         description:
           type: string
-    UserPublicProfileResponseDto:
-      type: object
-      properties:
-        id:
-          type: number
-          example: 1
-        createdAt:
-          format: date-time
-          type: string
-        updatedAt:
-          format: date-time
-          type: string
-        username:
-          type: string
-          example: johndoe
-          minLength: 2
-          maxLength: 30
-        about:
-          type: string
-          example: Пока ничего не рассказал о себе
-          minLength: 2
-          maxLength: 200
-        avatar:
-          type: string
-          example: https://i.pravatar.cc/300
-      required:
-        - id
-        - createdAt
-        - updatedAt
-        - username
-        - about
-        - avatar
     WishPartialDto:
       type: object
       properties:

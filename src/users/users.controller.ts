@@ -33,7 +33,11 @@ export class UsersController {
   @Post('find')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Search users by query' })
-  @ApiResponse({ status: 201, description: 'List of found users' })
+  @ApiResponse({
+    status: 201,
+    description: 'List of found users',
+    type: [UserProfileResponseDto],
+  })
   public async findMany(
     @Body() findUsersDto: FindUsersDto,
   ): Promise<UserProfileResponseDto[]> {
@@ -42,7 +46,11 @@ export class UsersController {
 
   @Get('me')
   @ApiOperation({ summary: 'Get current user profile' })
-  @ApiResponse({ status: 200, description: 'Current user profile' })
+  @ApiResponse({
+    status: 200,
+    description: 'Current user profile',
+    type: UserProfileResponseDto,
+  })
   public async findOwn(
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<UserProfileResponseDto> {
@@ -51,7 +59,11 @@ export class UsersController {
 
   @Patch('me')
   @ApiOperation({ summary: 'Update current user profile' })
-  @ApiResponse({ status: 200, description: 'Updated user profile' })
+  @ApiResponse({
+    status: 200,
+    description: 'Updated user profile',
+    type: UserProfileResponseDto,
+  })
   @ApiResponse({
     status: 400,
     description: 'Ошибка валидации переданных значений',
@@ -97,7 +109,11 @@ export class UsersController {
 
   @Get(':username')
   @ApiOperation({ summary: 'Get public profile by username' })
-  @ApiResponse({ status: 200, description: 'User public profile' })
+  @ApiResponse({
+    status: 200,
+    description: 'User public profile',
+    type: UserPublicProfileResponseDto,
+  })
   public async findOne(
     @Param() params: UsernameParameterDto,
   ): Promise<UserPublicProfileResponseDto> {

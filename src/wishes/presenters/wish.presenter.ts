@@ -192,35 +192,24 @@ export class WishPresenter {
       owner: { id: userId } as User,
     });
 
-    const full = await this.wishesService.findOneWishEntity(
+    const fullWish = await this.wishesService.findOneWishEntity(
       { id: newWish.id },
       { relations: [...WISH_VIEW_RELATIONS] },
     );
 
-    if (!full) {
+    if (!fullWish) {
       throw wishNotFoundException;
     }
 
-    return this.buildWishView(full, userId);
+    return this.buildWishView(fullWish, userId);
   }
 
   public buildWishView(wish: Wish, currentUserId: number): WishResponseDto {
-    const raised = this.offerPresenter.calculateRaised(
-      wish.offers,
-      currentUserId,
-    );
+    const wishPartialView = this.buildWishPartialView(wish, currentUserId);
 
     return {
-      id: wish.id,
-      name: wish.name,
-      link: wish.link,
-      image: wish.image,
-      price: wish.price,
-      raised,
-      description: wish.description,
-      createdAt: wish.createdAt,
-      updatedAt: wish.updatedAt,
-      owner: this.userPresenter.toProfile(wish.owner),
+      ...wishPartialView,
+      owner: this.userPresenter.toPublicProfile(wish.owner),
       offers: this.offerPresenter.buildOffersView(wish.offers, currentUserId),
     };
   }

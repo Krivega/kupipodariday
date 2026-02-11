@@ -28,10 +28,9 @@ export class OfferResponseDto {
   item!: WishResponseDto;
 
   @ApiProperty({
-    required: false,
     type: () => {
       return UserProfileResponseDto;
     },
   })
-  user?: UserProfileResponseDto;
+  user!: UserProfileResponseDto;
 }

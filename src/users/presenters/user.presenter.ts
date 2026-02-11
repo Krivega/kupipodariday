@@ -46,12 +46,7 @@ export class UserPresenter {
 
   public toProfile(user: User): UserProfileResponseDto {
     return {
-      id: user.id,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-      username: user.username,
-      about: user.about,
-      avatar: user.avatar,
+      ...this.toPublicProfile(user),
       email: user.email,
     };
   }
@@ -80,10 +75,11 @@ export class UserPresenter {
       image: wish.image,
       price: wish.price,
       raised,
+      copied: wish.copied,
       description: wish.description,
       createdAt: wish.createdAt,
       updatedAt: wish.updatedAt,
-      owner: this.toProfile(wish.owner),
+      owner: this.toPublicProfile(wish.owner),
       offers: this.offerPresenter.buildOffersView(wish.offers, currentUserId),
     };
   }

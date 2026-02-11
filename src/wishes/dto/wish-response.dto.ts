@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 import { OfferResponseDto } from '@/offers/dto/offer-response.dto';
-import { UserProfileResponseDto } from '@/users/dto/user-profile-response.dto';
+import { UserPublicProfileResponseDto } from '@/users/dto/user-public-profile-response.dto';
 
 export class WishResponseDto {
   @ApiProperty({ example: 1 })
@@ -16,11 +16,14 @@ export class WishResponseDto {
   @ApiProperty({ example: 'https://example.com/image.jpg' })
   image!: string;
 
-  @ApiProperty({ example: 99.99 })
+  @ApiProperty({ example: 99.99, minimum: 1 })
   price!: number;
 
-  @ApiProperty({ example: 0 })
+  @ApiProperty({ example: 0, minimum: 1 })
   raised!: number;
+
+  @ApiProperty({ example: 0 })
+  copied!: number;
 
   @ApiProperty({ example: 'Description text' })
   description!: string;
@@ -31,9 +34,18 @@ export class WishResponseDto {
   @ApiProperty()
   updatedAt!: Date;
 
-  @ApiProperty({ type: () => UserProfileResponseDto })
-  owner!: UserProfileResponseDto;
+  @ApiProperty({
+    type: () => {
+      return UserPublicProfileResponseDto;
+    },
+  })
+  owner!: UserPublicProfileResponseDto;
 
-  @ApiProperty({ type: () => OfferResponseDto, isArray: true })
+  @ApiProperty({
+    type: () => {
+      return OfferResponseDto;
+    },
+    isArray: true,
+  })
   offers!: OfferResponseDto[];
 }
