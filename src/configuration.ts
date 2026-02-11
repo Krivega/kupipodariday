@@ -22,6 +22,8 @@ export const schema = Joi.object({
   }),
   // jwt_secret для подписи JWT, обязателен для auth
   jwt_secret: Joi.string(),
+  // jwt_expires_in — время жизни access token (например: 15m, 1h, 7d)
+  jwt_expires_in: Joi.string().default('7d'),
 });
 
 export default function configuration() {
@@ -39,5 +41,6 @@ export default function configuration() {
         process.env.DATABASE_SYNCHRONIZE !== 'false',
     },
     jwt_secret: process.env.JWT_SECRET,
+    jwt_expires_in: process.env.JWT_EXPIRES_IN ?? '7d',
   };
 }
