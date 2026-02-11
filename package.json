@@ -12,7 +12,7 @@
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "lint": "yarn lint:ts && yarn lint:eslint",
+    "lint": "npm run lint:ts && npm run lint:eslint",
     "lint:eslint": "eslint \"{src,apps,libs,test}/**/*.ts\" --report-unused-disable-directives --max-warnings 0 --cache --cache-strategy=content",
     "lint:ts": "tsc --noEmit",
     "start": "nest start",
