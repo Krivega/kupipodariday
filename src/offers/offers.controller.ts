@@ -4,7 +4,7 @@ import { CurrentUser } from '@/auth/decorators/currentUser.decorator';
 import { AuthJwtGuard } from '@/auth/guards/jwt.guard';
 import { CreateOfferDto } from './dto/create-offer.dto';
 import { offerNotFoundException } from './exceptions';
-import { OffersService } from './offers.service';
+import { OfferPresenter } from './presenters/offer.presenter';
 
 import type { AuthenticatedUser } from '@/auth/decorators/currentUser.decorator';
 import type { User } from '@/users/entities/user.entity';
@@ -12,14 +12,14 @@ import type { User } from '@/users/entities/user.entity';
 @UseGuards(AuthJwtGuard)
 @Controller('offers')
 export class OffersController {
-  public constructor(private readonly offersService: OffersService) {}
+  public constructor(private readonly offerPresenter: OfferPresenter) {}
 
   @Post()
   public async create(
     @CurrentUser() user: AuthenticatedUser,
     @Body() createOfferDto: CreateOfferDto,
   ) {
-    return this.offersService.create({
+    return this.offerPresenter.create({
       ...createOfferDto,
       user: { id: user.id } as User,
     });
@@ -27,7 +27,7 @@ export class OffersController {
 
   @Get()
   public async findAll(@CurrentUser() user: AuthenticatedUser) {
-    return this.offersService.findManyForUser(user.id);
+    return this.offerPresenter.findManyForView(user.id);
   }
 
   @Get(':id')
@@ -35,7 +35,7 @@ export class OffersController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
   ) {
-    const offer = await this.offersService.findOneForUser(Number(id), user.id);
+    const offer = await this.offerPresenter.findOneForView(Number(id), user.id);
 
     if (!offer) {
       throw offerNotFoundException;

@@ -13,11 +13,8 @@ import { CurrentUser } from '@/auth/decorators/currentUser.decorator';
 import { AuthJwtGuard } from '@/auth/guards/jwt.guard';
 import { CreateWishlistDto } from './dto/create-wishlist.dto';
 import { UpdateWishlistDto } from './dto/update-wishlist.dto';
-import {
-  wishlistNotFoundException,
-  wishlistForbiddenException,
-} from './exceptions';
-import { WishlistsService } from './wishlists.service';
+import { wishlistNotFoundException } from './exceptions';
+import { WishlistPresenter } from './presenters/wishlist.presenter';
 
 import type { AuthenticatedUser } from '@/auth/decorators/currentUser.decorator';
 import type { User } from '@/users/entities/user.entity';
@@ -25,14 +22,14 @@ import type { User } from '@/users/entities/user.entity';
 @UseGuards(AuthJwtGuard)
 @Controller('wishlistlists')
 export class WishlistsController {
-  public constructor(private readonly wishlistsService: WishlistsService) {}
+  public constructor(private readonly wishlistPresenter: WishlistPresenter) {}
 
   @Post()
   public async create(
     @CurrentUser() user: AuthenticatedUser,
     @Body() createWishlistDto: CreateWishlistDto,
   ) {
-    return this.wishlistsService.create({
+    return this.wishlistPresenter.create({
       ...createWishlistDto,
       owner: { id: user.id } as User,
     });
@@ -40,21 +37,20 @@ export class WishlistsController {
 
   @Get()
   public async findAll(@CurrentUser() user: AuthenticatedUser) {
-    return this.wishlistsService.findMany(
-      user.id,
-      {},
-      { relations: ['owner', 'items', 'items.owner', 'items.offers'] },
-    );
+    return this.wishlistPresenter.findManyForView(user.id);
   }
 
   @Get(':id')
-  public async findOne(@Param('id') id: string) {
-    const wishlist = await this.wishlistsService.findOneWishlistEntity(
-      { id: Number(id) },
-      { relations: ['owner', 'items'] },
+  public async findOne(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+  ) {
+    const wishlist = await this.wishlistPresenter.findOneForView(
+      Number(id),
+      user.id,
     );
 
-    if (!wishlist) {
+    if (wishlist === undefined) {
       throw wishlistNotFoundException;
     }
 
@@ -67,25 +63,7 @@ export class WishlistsController {
     @Param('id') id: string,
     @Body() updateWishlistDto: UpdateWishlistDto,
   ) {
-    const wishlist = await this.wishlistsService.findOneWishlistEntity(
-      { id: Number(id) },
-      { relations: ['owner'] },
-    );
-
-    if (!wishlist) {
-      throw wishlistNotFoundException;
-    }
-
-    const userId = user.id;
-
-    if (wishlist.owner.id !== userId) {
-      throw wishlistForbiddenException;
-    }
-
-    return this.wishlistsService.updateWishlistEntity(
-      { id: Number(id) },
-      updateWishlistDto,
-    );
+    await this.wishlistPresenter.update(Number(id), user.id, updateWishlistDto);
   }
 
   @Delete(':id')
@@ -93,21 +71,6 @@ export class WishlistsController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
   ) {
-    const wishlist = await this.wishlistsService.findOneWishlistEntity(
-      { id: Number(id) },
-      { relations: ['owner'] },
-    );
-
-    if (!wishlist) {
-      throw wishlistNotFoundException;
-    }
-
-    const userId = user.id;
-
-    if (wishlist.owner.id !== userId) {
-      throw wishlistForbiddenException;
-    }
-
-    return this.wishlistsService.removeWishlistEntity({ id: Number(id) });
+    await this.wishlistPresenter.remove(Number(id), user.id);
   }
 }

@@ -12,45 +12,41 @@ import { CurrentUser } from '@/auth/decorators/currentUser.decorator';
 import { AuthJwtGuard } from '@/auth/guards/jwt.guard';
 import { FindUsersDto } from './dto/find-users.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import {
-  toUserProfileResponseDto,
-  UserProfileResponseDto,
-} from './dto/user-profile-response.dto';
-import {
-  toUserPublicProfileResponseDto,
-  UserPublicProfileResponseDto,
-} from './dto/user-public-profile-response.dto';
-import { toUserWishesDto, UserWishesDto } from './dto/user-wishes.dto';
+import { UserProfileResponseDto } from './dto/user-profile-response.dto';
+import { UserPublicProfileResponseDto } from './dto/user-public-profile-response.dto';
+import { UserWishesDto } from './dto/user-wishes.dto';
 import { userNotFoundException } from './exceptions';
-import { UsersService } from './users.service';
+import { UserPresenter } from './presenters/user.presenter';
 
 import type { AuthenticatedUser } from '@/auth/decorators/currentUser.decorator';
 
 @UseGuards(AuthJwtGuard)
 @Controller('users')
 export class UsersController {
-  public constructor(private readonly usersService: UsersService) {}
+  public constructor(private readonly userPresenter: UserPresenter) {}
 
   @Post('find')
   public async findMany(
     @Body() findUsersDto: FindUsersDto,
   ): Promise<UserProfileResponseDto[]> {
-    const users = await this.usersService.searchByQuery(findUsersDto.query);
+    const users = await this.userPresenter.searchByQuery(findUsersDto.query);
 
-    return users.map(toUserProfileResponseDto);
+    return users.map((u) => {
+      return this.userPresenter.toProfile(u);
+    });
   }
 
   @Get('me')
   public async findOwn(
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<UserProfileResponseDto> {
-    const own = await this.usersService.findOneUserEntity({ id: user.id });
+    const own = await this.userPresenter.findOne({ id: user.id });
 
     if (!own) {
       throw userNotFoundException;
     }
 
-    return toUserProfileResponseDto(own);
+    return this.userPresenter.toProfile(own);
   }
 
   @Patch('me')
@@ -59,53 +55,47 @@ export class UsersController {
     @Body() updateUserDto: UpdateUserDto,
   ): Promise<UserProfileResponseDto> {
     const id = Number(user.id);
-    const updated = await this.usersService.update({ id }, updateUserDto);
+    const updated = await this.userPresenter.update({ id }, updateUserDto);
 
-    return toUserProfileResponseDto(updated);
+    return this.userPresenter.toProfile(updated);
   }
 
   @Get('me/wishes')
   public async getOwnWishes(
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<UserWishesDto[]> {
-    const own = await this.usersService.findOneUserEntity(
-      { id: user.id },
-      { relations: ['wishes'] },
-    );
+    const own = await this.userPresenter.findOneWithWishes({ id: user.id });
 
     if (!own) {
       throw userNotFoundException;
     }
 
-    return own.wishes.map(toUserWishesDto);
+    return this.userPresenter.toWishes(own.wishes);
   }
 
   @Get(':username/wishes')
   public async getWishes(
     @Param('username') username: string,
   ): Promise<UserWishesDto[]> {
-    const user = await this.usersService.findOneUserEntity(
-      { username },
-      { relations: ['wishes'] },
-    );
+    const user = await this.userPresenter.findOneWithWishes({ username });
 
     if (!user) {
       throw userNotFoundException;
     }
 
-    return user.wishes.map(toUserWishesDto);
+    return this.userPresenter.toWishes(user.wishes);
   }
 
   @Get(':username')
   public async findOne(
     @Param('username') username: string,
   ): Promise<UserPublicProfileResponseDto> {
-    const user = await this.usersService.findOneUserEntity({ username });
+    const user = await this.userPresenter.findOne({ username });
 
     if (!user) {
       throw userNotFoundException;
     }
 
-    return toUserPublicProfileResponseDto(user);
+    return this.userPresenter.toPublicProfile(user);
   }
 }

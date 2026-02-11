@@ -31,29 +31,3 @@ export class UserWishesDto {
   @ApiProperty({ example: 'Description text', minLength: 1, maxLength: 1024 })
   description!: string;
 }
-
-export function toUserWishesDto(wish: {
-  id: number;
-  createdAt: Date;
-  updatedAt: Date;
-  name: string;
-  link: string;
-  image: string;
-  price: number;
-  raised: number;
-  copied: number;
-  description: string;
-}): UserWishesDto {
-  return {
-    id: wish.id,
-    createdAt: wish.createdAt,
-    updatedAt: wish.updatedAt,
-    name: wish.name,
-    link: wish.link,
-    image: wish.image,
-    price: Number(wish.price),
-    raised: Number(wish.raised),
-    copied: wish.copied,
-    description: wish.description,
-  };
-}

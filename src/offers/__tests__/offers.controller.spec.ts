@@ -1,7 +1,7 @@
 import { Test } from '@nestjs/testing';
 
 import { OffersController } from '../offers.controller';
-import { OffersService } from '../offers.service';
+import { OfferPresenter } from '../presenters/offer.presenter';
 
 import type { TestingModule } from '@nestjs/testing';
 
@@ -9,20 +9,18 @@ describe('OffersController', () => {
   let controller: OffersController;
 
   beforeEach(async () => {
-    const mockOffersService = {
+    const mockOfferPresenter = {
       create: jest.fn(),
-      findMany: jest.fn(),
-      findOne: jest.fn(),
-      update: jest.fn(),
-      remove: jest.fn(),
+      findManyForView: jest.fn(),
+      findOneForView: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [OffersController],
       providers: [
         {
-          provide: OffersService,
-          useValue: mockOffersService,
+          provide: OfferPresenter,
+          useValue: mockOfferPresenter,
         },
       ],
     }).compile();

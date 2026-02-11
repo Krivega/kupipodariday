@@ -13,55 +13,24 @@ import { CurrentUser } from '@/auth/decorators/currentUser.decorator';
 import { AuthJwtGuard } from '@/auth/guards/jwt.guard';
 import { CreateWishDto } from './dto/create-wish.dto';
 import { UpdateWishDto } from './dto/update-wish.dto';
-import {
-  wishNotFoundException,
-  wishForbiddenException,
-  wishChangePriceForbiddenException,
-} from './exceptions';
-import { WishesService } from './wishes.service';
+import { wishNotFoundException } from './exceptions';
+import { WishPresenter } from './presenters/wish.presenter';
 
 import type { AuthenticatedUser } from '@/auth/decorators/currentUser.decorator';
-import type { User } from '@/users/entities/user.entity';
 
 @UseGuards(AuthJwtGuard)
 @Controller('wishes')
 export class WishesController {
-  public constructor(private readonly wishesService: WishesService) {}
+  public constructor(private readonly wishPresenter: WishPresenter) {}
 
   @Get('last')
   public async getLast(@CurrentUser() user: AuthenticatedUser) {
-    const allWishes = await this.wishesService.findManyWishEntity(
-      {},
-      {
-        relations: ['owner'],
-        take: 40,
-        order: {
-          createdAt: 'DESC',
-        },
-      },
-    );
-
-    return allWishes.map((wish) => {
-      return this.wishesService.buildWishViewForUser(wish, user.id);
-    });
+    return this.wishPresenter.findManyLast(user.id);
   }
 
   @Get('top')
   public async getTop(@CurrentUser() user: AuthenticatedUser) {
-    const allWishes = await this.wishesService.findManyWishEntity(
-      {},
-      {
-        relations: ['owner'],
-        take: 20,
-        order: {
-          copied: 'DESC',
-        },
-      },
-    );
-
-    return allWishes.map((wish) => {
-      return this.wishesService.buildWishViewForUser(wish, user.id);
-    });
+    return this.wishPresenter.findManyTop(user.id);
   }
 
   @Get(':id')
@@ -69,16 +38,13 @@ export class WishesController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
   ) {
-    const wish = await this.wishesService.findOneWishEntity(
-      { id: Number(id) },
-      { relations: ['owner', 'offers', 'offers.user'] },
-    );
+    const wish = await this.wishPresenter.findOneForView(Number(id), user.id);
 
     if (!wish) {
       throw wishNotFoundException;
     }
 
-    return this.wishesService.buildWishViewForUser(wish, user.id);
+    return wish;
   }
 
   @Patch(':id')
@@ -87,29 +53,7 @@ export class WishesController {
     @Param('id') id: string,
     @Body() updateWishDto: UpdateWishDto,
   ) {
-    const wish = await this.wishesService.findOneWishEntity(
-      { id: Number(id) },
-      { relations: ['owner'] },
-    );
-
-    if (!wish) {
-      throw wishNotFoundException;
-    }
-
-    const userId = user.id;
-
-    if (wish.owner.id !== userId) {
-      throw wishForbiddenException;
-    }
-
-    if (wish.raised > 0) {
-      throw wishChangePriceForbiddenException;
-    }
-
-    return this.wishesService.updateWishEntity(
-      { id: Number(id) },
-      updateWishDto,
-    );
+    await this.wishPresenter.update(Number(id), user.id, updateWishDto);
   }
 
   @Delete(':id')
@@ -117,26 +61,7 @@ export class WishesController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
   ) {
-    const wish = await this.wishesService.findOneWishEntity(
-      { id: Number(id) },
-      { relations: ['owner'] },
-    );
-
-    if (!wish) {
-      throw wishNotFoundException;
-    }
-
-    const userId = user.id;
-
-    if (wish.owner.id !== userId) {
-      throw wishForbiddenException;
-    }
-
-    if (wish.raised > 0) {
-      throw wishChangePriceForbiddenException;
-    }
-
-    return this.wishesService.removeWishEntity({ id: Number(id) });
+    await this.wishPresenter.remove(Number(id), user.id);
   }
 
   @Post(':id/copy')
@@ -144,7 +69,7 @@ export class WishesController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
   ) {
-    const wish = await this.wishesService.copy({
+    const wish = await this.wishPresenter.copy({
       id: Number(id),
       userId: user.id,
     });
@@ -153,7 +78,7 @@ export class WishesController {
       throw wishNotFoundException;
     }
 
-    return this.wishesService.buildWishViewForUser(wish, user.id);
+    return wish;
   }
 
   @Post()
@@ -161,11 +86,9 @@ export class WishesController {
     @CurrentUser() user: AuthenticatedUser,
     @Body() createWishDto: CreateWishDto,
   ) {
-    const wish = await this.wishesService.create({
+    return this.wishPresenter.create({
       ...createWishDto,
-      owner: { id: user.id } as User,
+      owner: { id: user.id },
     });
-
-    return this.wishesService.buildWishViewForUser(wish, user.id);
   }
 }

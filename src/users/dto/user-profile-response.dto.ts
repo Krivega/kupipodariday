@@ -26,23 +26,3 @@ export class UserProfileResponseDto {
   @ApiProperty({ example: 'test@example.com' })
   email!: string;
 }
-
-export function toUserProfileResponseDto(user: {
-  id: number;
-  createdAt: Date;
-  updatedAt: Date;
-  username: string;
-  about: string;
-  avatar: string;
-  email: string;
-}): UserProfileResponseDto {
-  return {
-    id: user.id,
-    createdAt: user.createdAt,
-    updatedAt: user.updatedAt,
-    username: user.username,
-    about: user.about,
-    avatar: user.avatar,
-    email: user.email,
-  };
-}

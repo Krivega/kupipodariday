@@ -10,7 +10,6 @@ import { UsersService } from '../users.service';
 import type { TestingModule } from '@nestjs/testing';
 import type { Repository } from 'typeorm';
 import type { CreateUserDto } from '../dto/create-user.dto';
-import type { UpdateUserDto } from '../dto/update-user.dto';
 
 describe('UsersService', () => {
   let service: UsersService;
@@ -85,27 +84,32 @@ describe('UsersService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('create', () => {
-    it('should create and save a user', async () => {
-      const dto: CreateUserDto = {
-        username: 'johndoe',
-        email: 'test@example.com',
-        password: 'secret123',
+  describe('createUserEntity', () => {
+    it('should create user entity', () => {
+      const userData = {
+        ...mockUser,
+        password: 'hashed',
       };
 
       (repository.create as jest.Mock).mockReturnValue(mockUser);
+
+      const result = service.createUserEntity(
+        userData as CreateUserDto & {
+          password: string;
+        },
+      );
+
+      expect(repository.create).toHaveBeenCalledWith(userData);
+      expect(result).toEqual(mockUser);
+    });
+  });
+
+  describe('saveUserEntity', () => {
+    it('should save user entity', async () => {
       (repository.save as jest.Mock).mockResolvedValue(mockUser);
 
-      const result = await service.create(dto);
+      const result = await service.saveUserEntity(mockUser);
 
-      expect(repository.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          username: dto.username,
-          email: dto.email,
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          password: expect.any(String),
-        }),
-      );
       expect(repository.save).toHaveBeenCalledWith(mockUser);
       expect(result).toEqual(mockUser);
     });
@@ -232,24 +236,25 @@ describe('UsersService', () => {
     });
   });
 
-  describe('update', () => {
-    it('should call repository.update and return updated user', async () => {
+  describe('updateUserEntity', () => {
+    it('should call repository.update with filter and data', async () => {
       const filter = { id: 1 };
-      const updateDto: UpdateUserDto = { about: 'Updated about' };
-      const updatedUser = { ...mockUser, about: 'Updated about' };
+      const data = { about: 'Updated about' };
 
       (repository.update as jest.Mock).mockResolvedValue({
         affected: 1,
         raw: [],
         generatedMaps: [],
       });
-      (repository.findOne as jest.Mock).mockResolvedValue(updatedUser);
 
-      const result = await service.update(filter, updateDto);
+      const result = await service.updateUserEntity(filter, data);
 
-      expect(repository.update).toHaveBeenCalledWith(filter, updateDto);
-      expect(repository.findOne).toHaveBeenCalledWith({ where: filter });
-      expect(result).toEqual(updatedUser);
+      expect(repository.update).toHaveBeenCalledWith(filter, data);
+      expect(result).toEqual({
+        affected: 1,
+        raw: [],
+        generatedMaps: [],
+      });
     });
   });
 });

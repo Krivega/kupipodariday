@@ -1,7 +1,7 @@
 import { Test } from '@nestjs/testing';
 
+import { WishlistPresenter } from '../presenters/wishlist.presenter';
 import { WishlistsController } from '../wishlists.controller';
-import { WishlistsService } from '../wishlists.service';
 
 import type { TestingModule } from '@nestjs/testing';
 
@@ -9,20 +9,20 @@ describe('WishlistsController', () => {
   let controller: WishlistsController;
 
   beforeEach(async () => {
-    const mockWishlistsService = {
+    const mockWishlistPresenter = {
       create: jest.fn(),
-      findMany: jest.fn(),
-      findOneWishlistEntity: jest.fn(),
-      updateWishlistEntity: jest.fn(),
-      removeWishlistEntity: jest.fn(),
+      findManyForView: jest.fn(),
+      findOneForView: jest.fn(),
+      update: jest.fn(),
+      remove: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [WishlistsController],
       providers: [
         {
-          provide: WishlistsService,
-          useValue: mockWishlistsService,
+          provide: WishlistPresenter,
+          useValue: mockWishlistPresenter,
         },
       ],
     }).compile();

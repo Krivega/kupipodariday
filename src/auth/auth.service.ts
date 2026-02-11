@@ -2,17 +2,19 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 import { CreateUserDto } from '@/users/dto/create-user.dto';
+import { UserPresenter } from '@/users/presenters/user.presenter';
 import { UsersService } from '@/users/users.service';
 
 @Injectable()
 export class AuthService {
   public constructor(
     private readonly usersService: UsersService,
+    private readonly userPresenter: UserPresenter,
     private readonly jwtService: JwtService,
   ) {}
 
   public async signup(createUserDto: CreateUserDto) {
-    const user = await this.usersService.create(createUserDto);
+    const user = await this.userPresenter.create(createUserDto);
 
     return this.auth(user);
   }
@@ -38,7 +40,7 @@ export class AuthService {
     username: string;
     password: string;
   }) {
-    return this.usersService.findOneByCredentials({
+    return this.userPresenter.findOneByCredentials({
       username,
       password,
     });
