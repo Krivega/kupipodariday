@@ -4,6 +4,7 @@ import { FindOptionsWhere, ILike } from 'typeorm';
 
 import { OffersPresenter } from '@/offers/offers.presenter';
 import { WishResponseDto } from '@/wishes/dto/wish-response.dto';
+import { buildWishPartialFields } from '@/wishes/wish-view.utils';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserProfileResponseDto } from './dto/user-profile-response.dto';
@@ -63,17 +64,10 @@ export class UsersPresenter {
   }
 
   public buildWishResponse(wish: Wish, currentUserId: number): WishResponseDto {
+    const wishPartialView = buildWishPartialFields(wish);
+
     return {
-      id: wish.id,
-      name: wish.name,
-      link: wish.link,
-      image: wish.image,
-      price: Number(wish.price),
-      raised: Number(wish.raised),
-      copied: wish.copied,
-      description: wish.description,
-      createdAt: wish.createdAt,
-      updatedAt: wish.updatedAt,
+      ...wishPartialView,
       owner: this.toPublicProfile(wish.owner),
       offers: this.offerPresenter.buildOffersView(wish.offers, currentUserId),
     };
@@ -81,17 +75,10 @@ export class UsersPresenter {
 
   public toWishes(wishes: Wish[], currentUserId: number): UserWishesDto[] {
     return wishes.map((wish) => {
+      const wishPartialView = buildWishPartialFields(wish);
+
       return {
-        id: wish.id,
-        createdAt: wish.createdAt,
-        updatedAt: wish.updatedAt,
-        name: wish.name,
-        link: wish.link,
-        image: wish.image,
-        price: Number(wish.price),
-        raised: Number(wish.raised),
-        copied: wish.copied,
-        description: wish.description,
+        ...wishPartialView,
         offers: this.offerPresenter.buildOffersView(wish.offers, currentUserId),
       };
     });

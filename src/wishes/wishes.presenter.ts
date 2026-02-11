@@ -10,6 +10,7 @@ import {
   wishForbiddenException,
   wishNotFoundException,
 } from './exceptions';
+import { buildWishPartialFields } from './wish-view.utils';
 import { WishesService } from './wishes.service';
 
 import type { WishPartialDto } from './dto/wish-partial.dto';
@@ -226,17 +227,6 @@ export class WishesPresenter {
 
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   public buildWishPartialView(wish: Wish): WishPartialDto {
-    return {
-      id: wish.id,
-      createdAt: wish.createdAt,
-      updatedAt: wish.updatedAt,
-      name: wish.name,
-      link: wish.link,
-      image: wish.image,
-      price: Number(wish.price),
-      raised: Number(wish.raised),
-      copied: wish.copied,
-      description: wish.description,
-    };
+    return buildWishPartialFields(wish);
   }
 }
