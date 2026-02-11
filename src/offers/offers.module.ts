@@ -11,7 +11,9 @@ import { OfferPresenter } from './presenters/offer.presenter';
 @Module({
   imports: [
     TypeOrmModule.forFeature([Offer]),
-    UsersModule,
+    forwardRef(() => {
+      return UsersModule;
+    }),
     forwardRef(() => {
       return WishesModule;
     }),

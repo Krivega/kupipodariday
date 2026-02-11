@@ -1,13 +1,19 @@
 // Load .env before AppModule so ConfigModule sees process.env
 // eslint-disable-next-line import/order -- must run before AppModule
 import '@/load-env';
+
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 
 import { AppModule } from '@/app.module';
+import { generateSwagger } from './generateSwagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  if (process.env.GENERATE_SWAGGER === '1') {
+    await generateSwagger(app);
+  }
 
   app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
 

@@ -11,7 +11,9 @@ import { WishesService } from './wishes.service';
 @Module({
   imports: [
     TypeOrmModule.forFeature([Wish]),
-    UsersModule,
+    forwardRef(() => {
+      return UsersModule;
+    }),
     forwardRef(() => {
       return OffersModule;
     }),
