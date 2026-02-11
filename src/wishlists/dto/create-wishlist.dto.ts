@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsArray,
@@ -24,17 +24,7 @@ export class CreateWishlistDto {
   @MaxLength(250)
   name!: string;
 
-  @ApiProperty({
-    description: 'Wishlist description, string 0-1500 characters',
-    example: 'A list of gifts I would love to receive.',
-    maxLength: 1500,
-  })
-  @IsString()
-  @IsOptional()
-  @MaxLength(1500)
-  description?: string;
-
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Wishlist cover image url',
     example: 'https://i.pravatar.cc/150?img=3',
   })
@@ -43,11 +33,19 @@ export class CreateWishlistDto {
   @IsUrl()
   image!: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
+    description: 'Wishlist description',
+    maxLength: 1500,
+  })
+  @IsString()
+  @IsOptional()
+  @MaxLength(1500)
+  description?: string;
+
+  @ApiPropertyOptional({
     description: 'IDs of existing wishes to add to the wishlist',
     type: [Number],
-    required: false,
-    example: [1, 2, 3],
+    example: [1],
   })
   @IsOptional()
   @IsArray()

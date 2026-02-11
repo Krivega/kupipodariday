@@ -39,7 +39,7 @@ export class AuthController {
     status: 401,
     description: 'Некорректная пара логин и пароль',
   })
-  public async signin(
+  public async login(
     @Body() _signinUserDto: SigninUserDto,
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<SigninUserResponseDto> {

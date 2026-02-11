@@ -33,6 +33,11 @@ export class UserWishesDto {
   @ApiProperty({ example: 'Description text', minLength: 1, maxLength: 1024 })
   description!: string;
 
-  @ApiProperty({ type: () => OfferResponseDto, isArray: true })
+  @ApiProperty({
+    type: () => {
+      return OfferResponseDto;
+    },
+    isArray: true,
+  })
   offers!: OfferResponseDto[];
 }

@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-import type { OfferResponseDto } from '@/offers/dto/offer-response.dto';
-import type { UserProfileResponseDto } from '@/users/dto/user-profile-response.dto';
+import { OfferResponseDto } from '@/offers/dto/offer-response.dto';
+import { UserProfileResponseDto } from '@/users/dto/user-profile-response.dto';
 
 export class WishResponseDto {
   @ApiProperty({ example: 1 })
@@ -31,9 +31,9 @@ export class WishResponseDto {
   @ApiProperty()
   updatedAt!: Date;
 
-  @ApiProperty()
+  @ApiProperty({ type: () => UserProfileResponseDto })
   owner!: UserProfileResponseDto;
 
-  @ApiProperty({ type: 'array' })
+  @ApiProperty({ type: () => OfferResponseDto, isArray: true })
   offers!: OfferResponseDto[];
 }

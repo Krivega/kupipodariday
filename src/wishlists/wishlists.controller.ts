@@ -100,13 +100,15 @@ export class WishlistsController {
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Remove wishlist' })
+  @ApiOperation({
+    summary: 'Remove wishlist',
+  })
   @ApiResponse({
     status: 200,
     description: 'Deleted wishlist',
     type: WishlistResponseDto,
   })
-  public async remove(
+  public async removeOne(
     @CurrentUser() user: AuthenticatedUser,
     @Param() params: WishlistIdParameterDto,
   ): Promise<WishlistResponseDto> {

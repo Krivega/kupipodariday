@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-import type { UserProfileResponseDto } from '@/users/dto/user-profile-response.dto';
-import type { Wish } from '@/wishes/entities/wish.entity';
+import { UserProfileResponseDto } from '@/users/dto/user-profile-response.dto';
+import { WishResponseDto } from '@/wishes/dto/wish-response.dto';
 
 export class OfferResponseDto {
   @ApiProperty({ example: 1 })
@@ -19,9 +19,19 @@ export class OfferResponseDto {
   @ApiProperty({ example: false })
   hidden!: boolean;
 
-  @ApiProperty({ description: 'Wish item' })
-  item!: Wish;
+  @ApiProperty({
+    description: 'Wish item',
+    type: () => {
+      return WishResponseDto;
+    },
+  })
+  item!: WishResponseDto;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({
+    required: false,
+    type: () => {
+      return UserProfileResponseDto;
+    },
+  })
   user?: UserProfileResponseDto;
 }

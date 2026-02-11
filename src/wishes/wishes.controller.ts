@@ -97,13 +97,15 @@ export class WishesController {
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Remove wish' })
+  @ApiOperation({
+    summary: 'Remove wish',
+  })
   @ApiResponse({
     status: 200,
     description: 'Deleted wish',
     type: WishResponseDto,
   })
-  public async remove(
+  public async removeOne(
     @CurrentUser() user: AuthenticatedUser,
     @Param() params: WishIdParameterDto,
   ): Promise<WishResponseDto> {
@@ -112,9 +114,11 @@ export class WishesController {
 
   @Post(':id/copy')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Copy wish' })
+  @ApiOperation({
+    summary: 'Copy wish',
+  })
   @ApiResponse({ status: 201, description: 'Copied wish', type: Object })
-  public async copy(
+  public async copyWish(
     @CurrentUser() user: AuthenticatedUser,
     @Param() params: WishIdParameterDto,
   ): Promise<WishResponseDto> {

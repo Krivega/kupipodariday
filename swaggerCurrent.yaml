@@ -150,8 +150,8 @@ paths:
           in: path
           description: Offer ID
           schema:
-            example: 1
-            type: number
+            example: "1"
+            type: string
       responses:
         "200":
           description: Offer
@@ -253,7 +253,7 @@ paths:
       summary: Update wish
       tags: *a3
     delete:
-      operationId: WishesController_remove
+      operationId: WishesController_removeOne
       parameters:
         - name: id
           required: true
@@ -273,7 +273,7 @@ paths:
       tags: *a3
   /wishes/{id}/copy:
     post:
-      operationId: WishesController_copy
+      operationId: WishesController_copyWish
       parameters:
         - name: id
           required: true
@@ -371,7 +371,7 @@ paths:
       summary: Update wishlist
       tags: *a4
     delete:
-      operationId: WishlistsController_remove
+      operationId: WishlistsController_removeOne
       parameters:
         - name: id
           required: true
@@ -391,7 +391,7 @@ paths:
       tags: *a4
   /signin:
     post:
-      operationId: AuthController_signin
+      operationId: AuthController_login
       parameters: []
       requestBody:
         required: true
@@ -496,9 +496,42 @@ components:
           description: User password, min 6 characters
           example: secret123
           minLength: 6
-    Function:
+    UserProfileResponseDto:
       type: object
-      properties: {}
+      properties:
+        id:
+          type: number
+          example: 1
+        createdAt:
+          format: date-time
+          type: string
+        updatedAt:
+          format: date-time
+          type: string
+        username:
+          type: string
+          example: johndoe
+          minLength: 2
+          maxLength: 30
+        about:
+          type: string
+          example: Пока ничего не рассказал о себе
+          minLength: 2
+          maxLength: 200
+        avatar:
+          type: string
+          example: https://i.pravatar.cc/300
+        email:
+          type: string
+          example: test@example.com
+      required:
+        - id
+        - createdAt
+        - updatedAt
+        - username
+        - about
+        - avatar
+        - email
     WishResponseDto:
       type: object
       properties:
@@ -530,9 +563,11 @@ components:
           format: date-time
           type: string
         owner:
-          $ref: "#/components/schemas/Function"
+          $ref: "#/components/schemas/UserProfileResponseDto"
         offers:
           type: array
+          items:
+            $ref: "#/components/schemas/OfferResponseDto"
       required:
         - id
         - name
@@ -566,9 +601,9 @@ components:
         item:
           description: Wish item
           allOf:
-            - $ref: "#/components/schemas/Function"
+            - $ref: "#/components/schemas/WishResponseDto"
         user:
-          $ref: "#/components/schemas/Function"
+          $ref: "#/components/schemas/UserProfileResponseDto"
       required:
         - id
         - createdAt
@@ -687,28 +722,96 @@ components:
       properties:
         name:
           type: string
-          description: Wish name, string 1-250 characters
+        link:
+          type: string
+        image:
+          type: string
+        price:
+          type: number
+        description:
+          type: string
+    UserPublicProfileResponseDto:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 1
+        createdAt:
+          format: date-time
+          type: string
+        updatedAt:
+          format: date-time
+          type: string
+        username:
+          type: string
+          example: johndoe
+          minLength: 2
+          maxLength: 30
+        about:
+          type: string
+          example: Пока ничего не рассказал о себе
+          minLength: 2
+          maxLength: 200
+        avatar:
+          type: string
+          example: https://i.pravatar.cc/300
+      required:
+        - id
+        - createdAt
+        - updatedAt
+        - username
+        - about
+        - avatar
+    WishPartialDto:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 1
+        createdAt:
+          format: date-time
+          type: string
+        updatedAt:
+          format: date-time
+          type: string
+        name:
+          type: string
           example: Gift name
           minLength: 1
           maxLength: 250
         link:
           type: string
-          description: Wish link, string
           example: https://example.com/item
         image:
           type: string
-          description: Wish image, string
           example: https://example.com/image.jpg
         price:
           type: number
-          description: Wish price, number
           example: 99.99
+          minimum: 1
+        raised:
+          type: number
+          example: 0
+          minimum: 1
+        copied:
+          type: number
+          example: 0
         description:
           type: string
-          description: Wish description, string 1-1024 characters
           example: Description text
           minLength: 1
           maxLength: 1024
+      required:
+        - id
+        - createdAt
+        - updatedAt
+        - name
+        - link
+        - image
+        - price
+        - raised
+        - copied
+        - description
     WishlistResponseDto:
       type: object
       properties:
@@ -732,9 +835,11 @@ components:
           type: string
           example: https://i.pravatar.cc/150?img=3
         owner:
-          $ref: "#/components/schemas/Function"
+          $ref: "#/components/schemas/UserPublicProfileResponseDto"
         items:
           type: array
+          items:
+            $ref: "#/components/schemas/WishPartialDto"
       required:
         - id
         - createdAt
@@ -752,28 +857,23 @@ components:
           example: Мой вишлист
           minLength: 1
           maxLength: 250
-        description:
-          type: string
-          description: Wishlist description, string 0-1500 characters
-          example: A list of gifts I would love to receive.
-          maxLength: 1500
         image:
           type: string
           description: Wishlist cover image url
           example: https://i.pravatar.cc/150?img=3
+        description:
+          type: string
+          description: Wishlist description
+          maxLength: 1500
         itemsId:
           description: IDs of existing wishes to add to the wishlist
           example: &a6
             - 1
-            - 2
-            - 3
           type: array
           items:
             type: number
       required:
         - name
-        - description
-        - image
     UpdateWishlistDto:
       type: object
       properties:
@@ -783,15 +883,14 @@ components:
           example: Мой вишлист
           minLength: 1
           maxLength: 250
-        description:
-          type: string
-          description: Wishlist description, string 0-1500 characters
-          example: A list of gifts I would love to receive.
-          maxLength: 1500
         image:
           type: string
           description: Wishlist cover image url
           example: https://i.pravatar.cc/150?img=3
+        description:
+          type: string
+          description: Wishlist description
+          maxLength: 1500
         itemsId:
           description: IDs of existing wishes to add to the wishlist
           example: *a6

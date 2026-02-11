@@ -5,6 +5,7 @@ export class UsernameParameterDto {
   @ApiProperty({
     description: 'Username',
     example: 'johndoe',
+    type: String,
     minLength: 2,
     maxLength: 30,
   })

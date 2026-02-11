@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-import type { UserPublicProfileResponseDto } from '@/users/dto/user-public-profile-response.dto';
-import type { WishPartialDto } from '@/wishes/dto/wish-partial.dto';
+import { UserPublicProfileResponseDto } from '@/users/dto/user-public-profile-response.dto';
+import { WishPartialDto } from '@/wishes/dto/wish-partial.dto';
 
 export class WishlistResponseDto {
   @ApiProperty({ example: 1 })
@@ -22,9 +22,18 @@ export class WishlistResponseDto {
   @ApiProperty({ example: 'https://i.pravatar.cc/150?img=3' })
   image!: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    type: () => {
+      return UserPublicProfileResponseDto;
+    },
+  })
   owner!: UserPublicProfileResponseDto;
 
-  @ApiProperty({ type: 'array' })
+  @ApiProperty({
+    type: () => {
+      return WishPartialDto;
+    },
+    isArray: true,
+  })
   items!: WishPartialDto[];
 }
