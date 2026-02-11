@@ -12,6 +12,8 @@ import { generateSwagger } from './generateSwagger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.enableShutdownHooks();
+
   if (process.env.GENERATE_SWAGGER === '1') {
     await generateSwagger(app);
   }
