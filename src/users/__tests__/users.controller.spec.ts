@@ -1,7 +1,7 @@
 import { Test } from '@nestjs/testing';
 
-import { UserPresenter } from '../presenters/user.presenter';
 import { UsersController } from '../users.controller';
+import { UsersPresenter } from '../users.presenter';
 
 import type { TestingModule } from '@nestjs/testing';
 
@@ -9,7 +9,7 @@ describe('UsersController', () => {
   let controller: UsersController;
 
   beforeEach(async () => {
-    const mockUserPresenter = {
+    const mockUsersPresenter = {
       findOne: jest.fn(),
       findOneWithWishes: jest.fn(),
       searchByQuery: jest.fn(),
@@ -29,8 +29,8 @@ describe('UsersController', () => {
       controllers: [UsersController],
       providers: [
         {
-          provide: UserPresenter,
-          useValue: mockUserPresenter,
+          provide: UsersPresenter,
+          useValue: mockUsersPresenter,
         },
       ],
     }).compile();

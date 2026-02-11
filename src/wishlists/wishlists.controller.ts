@@ -19,7 +19,7 @@ import { UpdateWishlistDto } from './dto/update-wishlist.dto';
 import { WishlistIdParameterDto } from './dto/wishlist-id-parameter.dto';
 import { WishlistResponseDto } from './dto/wishlist-response.dto';
 import { wishlistNotFoundException } from './exceptions';
-import { WishlistPresenter } from './presenters/wishlist.presenter';
+import { WishlistsPresenter } from './wishlists.presenter';
 
 import type { AuthenticatedUser } from '@/auth/decorators/currentUser.decorator';
 import type { User } from '@/users/entities/user.entity';
@@ -28,7 +28,7 @@ import type { User } from '@/users/entities/user.entity';
 @UseGuards(AuthJwtGuard)
 @Controller('wishlistlists')
 export class WishlistsController {
-  public constructor(private readonly wishlistPresenter: WishlistPresenter) {}
+  public constructor(private readonly wishlistPresenter: WishlistsPresenter) {}
 
   @Get()
   @ApiOperation({ summary: 'Get all wishlists' })

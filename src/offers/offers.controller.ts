@@ -16,7 +16,7 @@ import { CreateOfferDto } from './dto/create-offer.dto';
 import { OfferIdParameterDto } from './dto/offer-id-parameter.dto';
 import { OfferResponseDto } from './dto/offer-response.dto';
 import { offerNotFoundException } from './exceptions';
-import { OfferPresenter } from './presenters/offer.presenter';
+import { OffersPresenter } from './offers.presenter';
 
 import type { AuthenticatedUser } from '@/auth/decorators/currentUser.decorator';
 import type { User } from '@/users/entities/user.entity';
@@ -25,7 +25,7 @@ import type { User } from '@/users/entities/user.entity';
 @UseGuards(AuthJwtGuard)
 @Controller('offers')
 export class OffersController {
-  public constructor(private readonly offerPresenter: OfferPresenter) {}
+  public constructor(private readonly offerPresenter: OffersPresenter) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)

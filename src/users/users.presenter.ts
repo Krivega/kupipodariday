@@ -2,22 +2,22 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { FindOptionsWhere, ILike } from 'typeorm';
 
-import { OfferPresenter } from '@/offers/presenters/offer.presenter';
+import { OffersPresenter } from '@/offers/offers.presenter';
 import { WishResponseDto } from '@/wishes/dto/wish-response.dto';
-import { CreateUserDto } from '../dto/create-user.dto';
-import { UpdateUserDto } from '../dto/update-user.dto';
-import { UserProfileResponseDto } from '../dto/user-profile-response.dto';
-import { UserPublicProfileResponseDto } from '../dto/user-public-profile-response.dto';
-import { UserWishesDto } from '../dto/user-wishes.dto';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { UserProfileResponseDto } from './dto/user-profile-response.dto';
+import { UserPublicProfileResponseDto } from './dto/user-public-profile-response.dto';
+import { UserWishesDto } from './dto/user-wishes.dto';
 import {
   userNotFoundException,
   userAlreadyExistsException,
-} from '../exceptions';
-import { hashPassword, comparePassword } from '../hashPassword';
-import { UsersService } from '../users.service';
+} from './exceptions';
+import { hashPassword, comparePassword } from './hashPassword';
+import { UsersService } from './users.service';
 
 import type { Wish } from '@/wishes/entities/wish.entity';
-import type { User } from '../entities/user.entity';
+import type { User } from './entities/user.entity';
 
 const USER_WISHES_RELATIONS = [
   'wishes',
@@ -33,15 +33,15 @@ const USER_OWN_WISHES_RELATIONS = [
 ] as const;
 
 @Injectable()
-export class UserPresenter {
+export class UsersPresenter {
   public constructor(
     private readonly usersService: UsersService,
     @Inject(
       forwardRef(() => {
-        return OfferPresenter;
+        return OffersPresenter;
       }),
     )
-    private readonly offerPresenter: OfferPresenter,
+    private readonly offerPresenter: OffersPresenter,
   ) {}
 
   public toProfile(user: User): UserProfileResponseDto {

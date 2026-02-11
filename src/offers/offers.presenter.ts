@@ -7,28 +7,28 @@ import {
   offerForOwnWishForbiddenException,
   offerNotFoundException,
 } from '@/offers/exceptions';
-import { UserPresenter } from '@/users/presenters/user.presenter';
-import { WishPresenter } from '@/wishes/presenters/wish.presenter';
-import { CreateOfferDto } from '../dto/create-offer.dto';
-import { OffersService } from '../offers.service';
+import { UsersPresenter } from '@/users/users.presenter';
+import { WishesPresenter } from '@/wishes/wishes.presenter';
+import { CreateOfferDto } from './dto/create-offer.dto';
+import { OffersService } from './offers.service';
 
 import type { Wish } from '@/wishes/entities/wish.entity';
-import type { OfferResponseDto } from '../dto/offer-response.dto';
-import type { Offer } from '../entities/offer.entity';
+import type { OfferResponseDto } from './dto/offer-response.dto';
+import type { Offer } from './entities/offer.entity';
 
 const OFFER_VIEW_RELATIONS = ['user', 'item'] as const;
 
 @Injectable()
-export class OfferPresenter {
+export class OffersPresenter {
   public constructor(
     private readonly offersService: OffersService,
     @Inject(
       forwardRef(() => {
-        return WishPresenter;
+        return WishesPresenter;
       }),
     )
-    private readonly wishPresenter: WishPresenter,
-    private readonly userPresenter: UserPresenter,
+    private readonly wishPresenter: WishesPresenter,
+    private readonly userPresenter: UsersPresenter,
   ) {}
 
   public async findManyForView(

@@ -1,6 +1,7 @@
 /* eslint-disable unicorn/no-null */
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { In } from 'typeorm';
 
 import { Wish } from '@/wishes/entities/wish.entity';
 import { Wishlist } from '../entities/wishlist.entity';
@@ -135,7 +136,7 @@ describe('WishlistsService', () => {
 
       expect(wishRepository.find).toHaveBeenCalledWith({
         where: {
-          id: expect.any(Number) as number,
+          id: In([10, 20]),
           owner: { id: 1 },
         },
       });

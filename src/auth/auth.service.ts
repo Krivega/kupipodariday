@@ -2,14 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 import { CreateUserDto } from '@/users/dto/create-user.dto';
-import { UserPresenter } from '@/users/presenters/user.presenter';
+import { UsersPresenter } from '@/users/users.presenter';
 
 import type { SignupUserResponseDto } from './dto/auth-response.dto';
 
 @Injectable()
 export class AuthService {
   public constructor(
-    private readonly userPresenter: UserPresenter,
+    private readonly userPresenter: UsersPresenter,
     private readonly jwtService: JwtService,
   ) {}
 

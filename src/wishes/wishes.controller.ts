@@ -19,7 +19,7 @@ import { UpdateWishDto } from './dto/update-wish.dto';
 import { WishIdParameterDto } from './dto/wish-id-parameter.dto';
 import { WishResponseDto } from './dto/wish-response.dto';
 import { wishNotFoundException } from './exceptions';
-import { WishPresenter } from './presenters/wish.presenter';
+import { WishesPresenter } from './wishes.presenter';
 
 import type { AuthenticatedUser } from '@/auth/decorators/currentUser.decorator';
 
@@ -27,7 +27,7 @@ import type { AuthenticatedUser } from '@/auth/decorators/currentUser.decorator'
 @UseGuards(AuthJwtGuard)
 @Controller('wishes')
 export class WishesController {
-  public constructor(private readonly wishPresenter: WishPresenter) {}
+  public constructor(private readonly wishPresenter: WishesPresenter) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)

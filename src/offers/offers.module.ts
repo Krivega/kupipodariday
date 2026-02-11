@@ -5,8 +5,8 @@ import { UsersModule } from '@/users/users.module';
 import { WishesModule } from '@/wishes/wishes.module';
 import { Offer } from './entities/offer.entity';
 import { OffersController } from './offers.controller';
+import { OffersPresenter } from './offers.presenter';
 import { OffersService } from './offers.service';
-import { OfferPresenter } from './presenters/offer.presenter';
 
 @Module({
   imports: [
@@ -19,7 +19,7 @@ import { OfferPresenter } from './presenters/offer.presenter';
     }),
   ],
   controllers: [OffersController],
-  providers: [OffersService, OfferPresenter],
-  exports: [OffersService, OfferPresenter],
+  providers: [OffersService, OffersPresenter],
+  exports: [OffersService, OffersPresenter],
 })
 export class OffersModule {}

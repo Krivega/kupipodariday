@@ -4,8 +4,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { OffersModule } from '@/offers/offers.module';
 import { UsersModule } from '@/users/users.module';
 import { Wish } from './entities/wish.entity';
-import { WishPresenter } from './presenters/wish.presenter';
 import { WishesController } from './wishes.controller';
+import { WishesPresenter } from './wishes.presenter';
 import { WishesService } from './wishes.service';
 
 @Module({
@@ -19,7 +19,7 @@ import { WishesService } from './wishes.service';
     }),
   ],
   controllers: [WishesController],
-  providers: [WishesService, WishPresenter],
-  exports: [WishesService, WishPresenter],
+  providers: [WishesService, WishesPresenter],
+  exports: [WishesService, WishesPresenter],
 })
 export class WishesModule {}

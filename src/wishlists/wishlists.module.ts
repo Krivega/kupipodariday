@@ -5,8 +5,8 @@ import { UsersModule } from '@/users/users.module';
 import { Wish } from '@/wishes/entities/wish.entity';
 import { WishesModule } from '@/wishes/wishes.module';
 import { Wishlist } from './entities/wishlist.entity';
-import { WishlistPresenter } from './presenters/wishlist.presenter';
 import { WishlistsController } from './wishlists.controller';
+import { WishlistsPresenter } from './wishlists.presenter';
 import { WishlistsService } from './wishlists.service';
 
 @Module({
@@ -18,7 +18,7 @@ import { WishlistsService } from './wishlists.service';
     }),
   ],
   controllers: [WishlistsController],
-  providers: [WishlistsService, WishlistPresenter],
+  providers: [WishlistsService, WishlistsPresenter],
   exports: [WishlistsService],
 })
 export class WishlistsModule {}

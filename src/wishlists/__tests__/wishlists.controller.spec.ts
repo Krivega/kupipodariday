@@ -1,7 +1,7 @@
 import { Test } from '@nestjs/testing';
 
-import { WishlistPresenter } from '../presenters/wishlist.presenter';
 import { WishlistsController } from '../wishlists.controller';
+import { WishlistsPresenter } from '../wishlists.presenter';
 
 import type { TestingModule } from '@nestjs/testing';
 
@@ -21,7 +21,7 @@ describe('WishlistsController', () => {
       controllers: [WishlistsController],
       providers: [
         {
-          provide: WishlistPresenter,
+          provide: WishlistsPresenter,
           useValue: mockWishlistPresenter,
         },
       ],

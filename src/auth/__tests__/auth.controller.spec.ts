@@ -1,7 +1,7 @@
 import { JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
 
-import { UserPresenter } from '@/users/presenters/user.presenter';
+import { UsersPresenter } from '@/users/users.presenter';
 import { UsersService } from '@/users/users.service';
 import { AuthController } from '../auth.controller';
 import { AuthService } from '../auth.service';
@@ -15,7 +15,7 @@ describe('AuthController', () => {
     hasExistsUserEntity: jest.fn(),
   };
 
-  const mockUserPresenter = {
+  const mockUsersPresenter = {
     create: jest.fn(),
   };
 
@@ -29,7 +29,7 @@ describe('AuthController', () => {
       providers: [
         AuthService,
         { provide: UsersService, useValue: mockUsersService },
-        { provide: UserPresenter, useValue: mockUserPresenter },
+        { provide: UsersPresenter, useValue: mockUsersPresenter },
         { provide: JwtService, useValue: mockJwtService },
       ],
     }).compile();

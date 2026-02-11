@@ -20,7 +20,7 @@ import { UserProfileResponseDto } from './dto/user-profile-response.dto';
 import { UserPublicProfileResponseDto } from './dto/user-public-profile-response.dto';
 import { UserWishesDto } from './dto/user-wishes.dto';
 import { UsernameParameterDto } from './dto/username-parameter.dto';
-import { UserPresenter } from './presenters/user.presenter';
+import { UsersPresenter } from './users.presenter';
 
 import type { AuthenticatedUser } from '@/auth/decorators/currentUser.decorator';
 
@@ -28,7 +28,7 @@ import type { AuthenticatedUser } from '@/auth/decorators/currentUser.decorator'
 @UseGuards(AuthJwtGuard)
 @Controller('users')
 export class UsersController {
-  public constructor(private readonly userPresenter: UserPresenter) {}
+  public constructor(private readonly userPresenter: UsersPresenter) {}
 
   @Post('find')
   @HttpCode(HttpStatus.CREATED)

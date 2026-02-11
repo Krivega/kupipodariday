@@ -1,29 +1,29 @@
 import { Injectable } from '@nestjs/common';
 
-import { OfferPresenter } from '@/offers/presenters/offer.presenter';
-import { UserPresenter } from '@/users/presenters/user.presenter';
-import { CreateWishDto } from '../dto/create-wish.dto';
-import { UpdateWishDto } from '../dto/update-wish.dto';
-import { Wish } from '../entities/wish.entity';
+import { OffersPresenter } from '@/offers/offers.presenter';
+import { UsersPresenter } from '@/users/users.presenter';
+import { CreateWishDto } from './dto/create-wish.dto';
+import { UpdateWishDto } from './dto/update-wish.dto';
+import { Wish } from './entities/wish.entity';
 import {
   wishChangePriceForbiddenException,
   wishForbiddenException,
   wishNotFoundException,
-} from '../exceptions';
-import { WishesService } from '../wishes.service';
+} from './exceptions';
+import { WishesService } from './wishes.service';
 
 import type { User } from '@/users/entities/user.entity';
-import type { WishPartialDto } from '../dto/wish-partial.dto';
-import type { WishResponseDto } from '../dto/wish-response.dto';
+import type { WishPartialDto } from './dto/wish-partial.dto';
+import type { WishResponseDto } from './dto/wish-response.dto';
 
 const WISH_VIEW_RELATIONS = ['owner', 'offers', 'offers.user'] as const;
 const WISH_OWNER_RELATION = ['owner'] as const;
 
 @Injectable()
-export class WishPresenter {
+export class WishesPresenter {
   public constructor(
-    private readonly offerPresenter: OfferPresenter,
-    private readonly userPresenter: UserPresenter,
+    private readonly offerPresenter: OffersPresenter,
+    private readonly userPresenter: UsersPresenter,
     private readonly wishesService: WishesService,
   ) {}
 

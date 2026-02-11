@@ -1,7 +1,7 @@
 import { Test } from '@nestjs/testing';
 
 import { OffersController } from '../offers.controller';
-import { OfferPresenter } from '../presenters/offer.presenter';
+import { OffersPresenter } from '../offers.presenter';
 
 import type { TestingModule } from '@nestjs/testing';
 
@@ -19,7 +19,7 @@ describe('OffersController', () => {
       controllers: [OffersController],
       providers: [
         {
-          provide: OfferPresenter,
+          provide: OffersPresenter,
           useValue: mockOfferPresenter,
         },
       ],

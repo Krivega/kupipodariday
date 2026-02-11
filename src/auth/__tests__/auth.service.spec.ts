@@ -1,7 +1,7 @@
 import { JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
 
-import { UserPresenter } from '@/users/presenters/user.presenter';
+import { UsersPresenter } from '@/users/users.presenter';
 import { UsersService } from '@/users/users.service';
 import { AuthService } from '../auth.service';
 
@@ -14,7 +14,7 @@ describe('AuthService', () => {
     incrementTokenVersionUserEntity: jest.fn(),
   };
 
-  const mockUserPresenter = {
+  const mockUsersPresenter = {
     create: jest.fn(),
     findOneByCredentials: jest.fn(),
   };
@@ -28,7 +28,7 @@ describe('AuthService', () => {
       providers: [
         AuthService,
         { provide: UsersService, useValue: mockUsersService },
-        { provide: UserPresenter, useValue: mockUserPresenter },
+        { provide: UsersPresenter, useValue: mockUsersPresenter },
         { provide: JwtService, useValue: mockJwtService },
       ],
     }).compile();

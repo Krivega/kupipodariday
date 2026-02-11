@@ -1,18 +1,18 @@
 import { Injectable } from '@nestjs/common';
 
-import { UserPresenter } from '@/users/presenters/user.presenter';
-import { WishPresenter } from '@/wishes/presenters/wish.presenter';
-import { CreateWishlistDto } from '../dto/create-wishlist.dto';
-import { UpdateWishlistDto } from '../dto/update-wishlist.dto';
-import { Wishlist } from '../entities/wishlist.entity';
+import { UsersPresenter } from '@/users/users.presenter';
+import { WishesPresenter } from '@/wishes/wishes.presenter';
+import { CreateWishlistDto } from './dto/create-wishlist.dto';
+import { UpdateWishlistDto } from './dto/update-wishlist.dto';
+import { Wishlist } from './entities/wishlist.entity';
 import {
   wishlistForbiddenException,
   wishlistNotFoundException,
-} from '../exceptions';
-import { WishlistsService } from '../wishlists.service';
+} from './exceptions';
+import { WishlistsService } from './wishlists.service';
 
 import type { User } from '@/users/entities/user.entity';
-import type { WishlistResponseDto } from '../dto/wishlist-response.dto';
+import type { WishlistResponseDto } from './dto/wishlist-response.dto';
 
 const WISHLIST_VIEW_RELATIONS = [
   'owner',
@@ -24,10 +24,10 @@ const WISHLIST_VIEW_RELATIONS = [
 const WISHLIST_OWNER_RELATION = ['owner'] as const;
 
 @Injectable()
-export class WishlistPresenter {
+export class WishlistsPresenter {
   public constructor(
-    private readonly wishPresenter: WishPresenter,
-    private readonly userPresenter: UserPresenter,
+    private readonly wishPresenter: WishesPresenter,
+    private readonly userPresenter: UsersPresenter,
     private readonly wishlistsService: WishlistsService,
   ) {}
 
@@ -77,11 +77,15 @@ export class WishlistPresenter {
     const savedWishlist =
       await this.wishlistsService.saveWishlistEntity(wishlist);
 
-    await this.wishlistsService.linkItemsToWishlist(
-      savedWishlist,
-      createWishlistDto.itemsId ?? [],
-      createWishlistDto.owner.id,
-    );
+    const { itemsId } = createWishlistDto;
+
+    if (itemsId) {
+      await this.wishlistsService.linkItemsToWishlist(
+        savedWishlist,
+        itemsId,
+        createWishlistDto.owner.id,
+      );
+    }
 
     const result = await this.wishlistsService.findOneWishlistEntity(
       { id: savedWishlist.id },
