@@ -40,7 +40,10 @@ export class WishlistsController {
 
   @Get()
   public async findAll() {
-    return this.wishlistsService.findMany();
+    return this.wishlistsService.findMany(
+      {},
+      { relations: ['owner', 'items'] },
+    );
   }
 
   @Get(':id')

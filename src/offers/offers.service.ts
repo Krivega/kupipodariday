@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindManyOptions, FindOptionsWhere } from 'typeorm';
 
@@ -28,35 +28,20 @@ export type OfferView = {
   };
 };
 
-function buildOfferViewForUser(offer: Offer, currentUserId: number): OfferView {
-  const user = offer.user as User | undefined;
-  const isOwn = user?.id === currentUserId;
-  const hideUser = offer.hidden && !isOwn;
-
-  const view: OfferView = {
-    id: offer.id,
-    amount: offer.amount,
-    hidden: offer.hidden,
-    item: offer.item,
-  };
-
-  if (!hideUser && user) {
-    view.user = {
-      id: user.id,
-      username: user.username,
-      about: user.about,
-      avatar: user.avatar,
-    };
-  }
-
-  return view;
-}
+const hasVisibleOffer = (offer: Offer, currentUserId: number) => {
+  return !offer.hidden || offer.user.id === currentUserId;
+};
 
 @Injectable()
 export class OffersService {
   public constructor(
     @InjectRepository(Offer)
     private readonly offersRepository: Repository<Offer>,
+    @Inject(
+      forwardRef(() => {
+        return WishesService;
+      }),
+    )
     private readonly wishesService: WishesService,
   ) {}
 
@@ -108,9 +93,30 @@ export class OffersService {
     });
   }
 
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
+  public buildOffersViewForUser(offers: Offer[], currentUserId: number) {
+    return offers.filter((offer) => {
+      return hasVisibleOffer(offer, currentUserId);
+    });
+  }
+
+  /**
+   * Считает сумму собранных средств как сумму заявок других пользователей.
+   */
+  public calculateRaisedFromOffers(
+    offers: Offer[],
+    currentUserId: number,
+  ): number {
+    return this.buildOffersViewForUser(offers, currentUserId).reduce(
+      (sum, offer) => {
+        return sum + Number(offer.amount);
+      },
+      0,
+    );
+  }
+
   /**
    * Список заявок для текущего пользователя: для чужих заявок с hidden=true
-   * данные скидывающегося не возвращаются.
    */
   public async findManyForUser(currentUserId: number): Promise<OfferView[]> {
     const offers = await this.offersRepository.find({
@@ -118,9 +124,7 @@ export class OffersService {
       order: { createdAt: 'DESC' },
     });
 
-    return offers.map((offer) => {
-      return buildOfferViewForUser(offer, currentUserId);
-    });
+    return this.buildOffersViewForUser(offers, currentUserId);
   }
 
   /**
@@ -135,11 +139,11 @@ export class OffersService {
       relations: ['user', 'item'],
     });
 
-    if (!offer) {
+    if (!offer || !hasVisibleOffer(offer, currentUserId)) {
       return undefined;
     }
 
-    return buildOfferViewForUser(offer, currentUserId);
+    return offer;
   }
 
   private ensureUserCanContributeToWish({
@@ -155,7 +159,7 @@ export class OffersService {
       throw offerForOwnWishForbiddenException;
     }
 
-    const raised = this.wishesService.calculateRaisedFromOffers(wish.offers);
+    const raised = this.calculateRaisedFromOffers(wish.offers, user.id);
 
     if (raised >= wish.price) {
       throw offerAlreadyFundedException;

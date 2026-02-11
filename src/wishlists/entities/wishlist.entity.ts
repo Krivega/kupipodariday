@@ -1,4 +1,4 @@
-import { IsString, MinLength, MaxLength, IsUrl } from 'class-validator';
+import { IsOptional, IsString, MinLength, MaxLength, IsUrl } from 'class-validator';
 import {
   CreateDateColumn,
   Entity,
@@ -32,8 +32,10 @@ export class Wishlist {
 
   @Column({ nullable: true })
   @IsString()
+  @IsOptional()
+  @MinLength(1)
   @MaxLength(1500)
-  description?: string; // описание подборки, строка до 1500 символов;
+  description?: string; // описание подборки, строка от 1 до 1500 символов; пустая строка не допускается
 
   @Column()
   @IsUrl()

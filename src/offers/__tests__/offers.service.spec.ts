@@ -84,7 +84,6 @@ describe('OffersService', () => {
       } as never;
 
       (wishesService.findOne as jest.Mock).mockResolvedValue(mockWish);
-      (wishesService.calculateRaisedFromOffers as jest.Mock).mockReturnValue(0);
       (repository.create as jest.Mock).mockReturnValue(mockOffer);
       (repository.save as jest.Mock).mockResolvedValue(mockOffer);
 

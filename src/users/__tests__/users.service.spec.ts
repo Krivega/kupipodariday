@@ -233,17 +233,23 @@ describe('UsersService', () => {
   });
 
   describe('update', () => {
-    it('should call repository.update with filter and dto', async () => {
+    it('should call repository.update and return updated user', async () => {
       const filter = { id: 1 };
       const updateDto: UpdateUserDto = { about: 'Updated about' };
-      const updateResult = { affected: 1, raw: [], generatedMaps: [] };
+      const updatedUser = { ...mockUser, about: 'Updated about' };
 
-      (repository.update as jest.Mock).mockResolvedValue(updateResult);
+      (repository.update as jest.Mock).mockResolvedValue({
+        affected: 1,
+        raw: [],
+        generatedMaps: [],
+      });
+      (repository.findOne as jest.Mock).mockResolvedValue(updatedUser);
 
       const result = await service.update(filter, updateDto);
 
       expect(repository.update).toHaveBeenCalledWith(filter, updateDto);
-      expect(result).toEqual(updateResult);
+      expect(repository.findOne).toHaveBeenCalledWith({ where: filter });
+      expect(result).toEqual(updatedUser);
     });
   });
 });

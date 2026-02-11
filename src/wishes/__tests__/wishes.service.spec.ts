@@ -2,11 +2,13 @@
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 
+import { OffersService } from '@/offers/offers.service';
 import { Wish } from '../entities/wish.entity';
 import { WishesService } from '../wishes.service';
 
 import type { TestingModule } from '@nestjs/testing';
 import type { Repository } from 'typeorm';
+import type { Offer } from '@/offers/entities/offer.entity';
 import type { User } from '@/users/entities/user.entity';
 import type { CreateWishDto } from '../dto/create-wish.dto';
 import type { UpdateWishDto } from '../dto/update-wish.dto';
@@ -14,6 +16,7 @@ import type { UpdateWishDto } from '../dto/update-wish.dto';
 describe('WishesService', () => {
   let service: WishesService;
   let repository: jest.Mocked<Repository<Wish>>;
+  let offersService: jest.Mocked<OffersService>;
 
   const mockWish: Wish = {
     id: 1,
@@ -41,6 +44,11 @@ describe('WishesService', () => {
       delete: jest.fn(),
     };
 
+    const mockOffersService = {
+      calculateRaisedFromOffers: jest.fn(),
+      buildOffersViewForUser: jest.fn(),
+    } as unknown as jest.Mocked<OffersService>;
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         WishesService,
@@ -48,11 +56,16 @@ describe('WishesService', () => {
           provide: getRepositoryToken(Wish),
           useValue: mockRepository,
         },
+        {
+          provide: OffersService,
+          useValue: mockOffersService,
+        },
       ],
     }).compile();
 
     service = module.get<WishesService>(WishesService);
     repository = module.get(getRepositoryToken(Wish));
+    offersService = module.get(OffersService);
   });
 
   afterEach(() => {
@@ -197,6 +210,40 @@ describe('WishesService', () => {
 
       expect(repository.delete).toHaveBeenCalledWith(filter);
       expect(result).toEqual(deleteResult);
+    });
+  });
+
+  describe('buildWishViewForUser', () => {
+    it('should build wish view with offers filtered for user', () => {
+      const currentUserId = 1;
+      const filteredOffers = [{ id: 1, amount: 50, hidden: false }] as Offer[];
+
+      offersService.calculateRaisedFromOffers.mockReturnValue(50);
+      offersService.buildOffersViewForUser.mockReturnValue(filteredOffers);
+
+      const result = service.buildWishViewForUser(mockWish, currentUserId);
+
+      expect(offersService.calculateRaisedFromOffers).toHaveBeenCalledWith(
+        mockWish.offers,
+        currentUserId,
+      );
+      expect(offersService.buildOffersViewForUser).toHaveBeenCalledWith(
+        mockWish.offers,
+        currentUserId,
+      );
+      expect(result).toEqual({
+        raised: 50,
+        id: mockWish.id,
+        name: mockWish.name,
+        price: mockWish.price,
+        image: mockWish.image,
+        link: mockWish.link,
+        description: mockWish.description,
+        createdAt: mockWish.createdAt,
+        updatedAt: mockWish.updatedAt,
+        owner: mockWish.owner,
+        offers: filteredOffers,
+      });
     });
   });
 });
