@@ -84,7 +84,7 @@ export class WishlistsService {
 
     await this.wishListRepository.save({
       ...wishlist,
-      items: [...wishlist.items, ...wishes],
+      items: [...(wishlist.items ?? []), ...wishes],
     });
   }
 }

@@ -24,7 +24,7 @@ export class CreateWishlistDto {
   @MaxLength(250)
   name!: string;
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     description: 'Wishlist cover image url',
     example: 'https://i.pravatar.cc/150?img=3',
   })

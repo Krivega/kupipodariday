@@ -164,7 +164,7 @@ export class WishlistsPresenter {
       description: wishlist.description,
       image: wishlist.image,
       owner: this.userPresenter.toPublicProfile(wishlist.owner),
-      items: wishlist.items.map((item) => {
+      items: (wishlist.items ?? []).map((item) => {
         return this.wishPresenter.buildWishPartialView(item);
       }),
     };

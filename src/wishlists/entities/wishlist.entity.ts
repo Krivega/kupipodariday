@@ -72,5 +72,5 @@ export class Wishlist {
     joinColumn: { name: 'wishlist_id', referencedColumnName: 'id' },
     inverseJoinColumn: { name: 'wish_id', referencedColumnName: 'id' },
   })
-  items: Wish[]; // набор ссылок на подарки
+  items?: Wish[]; // набор ссылок на подарки; undefined если relation не загружена
 }
