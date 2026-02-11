@@ -29,8 +29,6 @@ export class WishlistsService {
     });
   }
 
-  // ——— Pure CRUD ———
-
   public async findOneWishlistEntity(
     filter: FindOptionsWhere<Wishlist>,
     options?: Omit<FindManyOptions<Wishlist>, 'where'>,
