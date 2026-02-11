@@ -60,9 +60,7 @@ export class OffersController {
     @CurrentUser() user: AuthenticatedUser,
     @Param() params: OfferIdParameterDto,
   ): Promise<OfferResponseDto> {
-    const offerId = Number.parseInt(params.id, 10);
-
-    const offer = await this.offerPresenter.findOneForView(offerId, user.id);
+    const offer = await this.offerPresenter.findOneForView(params.id, user.id);
 
     if (offer === undefined) {
       throw offerNotFoundException;

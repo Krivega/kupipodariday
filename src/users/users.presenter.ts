@@ -68,7 +68,7 @@ export class UsersPresenter {
       name: wish.name,
       link: wish.link,
       image: wish.image,
-      price: wish.price,
+      price: Number(wish.price),
       raised: Number(wish.raised),
       copied: wish.copied,
       description: wish.description,
