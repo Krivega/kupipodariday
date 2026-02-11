@@ -1,14 +1,23 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsNumber, IsOptional, Min } from 'class-validator';
+import {
+  IsBoolean,
+  IsInt,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  Min,
+} from 'class-validator';
 
 export class CreateOfferDto {
   @ApiProperty({
     description: 'Offer amount, number with up to 2 decimal places',
     example: 50.5,
+    minimum: 1,
   })
   @IsNumber({ maxDecimalPlaces: 2 })
   @Min(1)
-  amount: number;
+  @IsNotEmpty()
+  amount!: number;
 
   @ApiProperty({
     description:
@@ -25,7 +34,8 @@ export class CreateOfferDto {
     description: 'Identifier of the wish item the offer belongs to',
     example: 1,
   })
-  @IsNumber()
+  @IsInt()
   @Min(1)
-  itemId: number;
+  @IsNotEmpty()
+  itemId!: number;
 }

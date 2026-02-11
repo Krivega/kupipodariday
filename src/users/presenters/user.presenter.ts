@@ -7,7 +7,10 @@ import { UpdateUserDto } from '../dto/update-user.dto';
 import { UserProfileResponseDto } from '../dto/user-profile-response.dto';
 import { UserPublicProfileResponseDto } from '../dto/user-public-profile-response.dto';
 import { UserWishesDto } from '../dto/user-wishes.dto';
-import { userNotFoundException } from '../exceptions';
+import {
+  userNotFoundException,
+  userAlreadyExistsException,
+} from '../exceptions';
 import { hashPassword, comparePassword } from '../hashPassword';
 import { UsersService } from '../users.service';
 
@@ -58,32 +61,72 @@ export class UserPresenter {
     });
   }
 
-  public async findOne(filter: FindOptionsWhere<User>): Promise<User | null> {
-    return this.usersService.findOneUserEntity(filter);
+  public async findOnePublicProfile(
+    filter: FindOptionsWhere<User>,
+  ): Promise<UserPublicProfileResponseDto> {
+    const user = await this.usersService.findOneUserEntity(filter);
+
+    if (!user) {
+      throw userNotFoundException;
+    }
+
+    return this.toPublicProfile(user);
+  }
+
+  public async findOneProfile(
+    filter: FindOptionsWhere<User>,
+  ): Promise<UserProfileResponseDto> {
+    const user = await this.usersService.findOneUserEntity(filter);
+
+    if (!user) {
+      throw userNotFoundException;
+    }
+
+    return this.toProfile(user);
   }
 
   public async findOneWithWishes(
     filter: FindOptionsWhere<User>,
-  ): Promise<User | null> {
-    return this.usersService.findOneUserEntity(filter, {
+  ): Promise<UserWishesDto[]> {
+    const user = await this.usersService.findOneUserEntity(filter, {
       relations: ['wishes'],
     });
+
+    if (!user) {
+      throw userNotFoundException;
+    }
+
+    return this.toWishes(user.wishes);
   }
 
-  public async create(createUserDto: CreateUserDto): Promise<User> {
+  public async create(
+    createUserDto: CreateUserDto,
+  ): Promise<UserProfileResponseDto> {
+    const isUserExistsByUsernameOrEmail =
+      await this.usersService.hasExistsUserEntity([
+        { username: createUserDto.username },
+        { email: createUserDto.email },
+      ]);
+
+    if (isUserExistsByUsernameOrEmail) {
+      throw userAlreadyExistsException;
+    }
+
     const hashedPassword = await hashPassword(createUserDto.password);
     const user = this.usersService.createUserEntity({
       ...createUserDto,
       password: hashedPassword,
     });
 
-    return this.usersService.saveUserEntity(user);
+    const userSaved = await this.usersService.saveUserEntity(user);
+
+    return this.toProfile(userSaved);
   }
 
   public async update(
     filter: FindOptionsWhere<User>,
     updateUserDto: UpdateUserDto,
-  ): Promise<User> {
+  ): Promise<UserProfileResponseDto> {
     const data =
       updateUserDto.password === undefined
         ? updateUserDto
@@ -100,7 +143,7 @@ export class UserPresenter {
       throw userNotFoundException;
     }
 
-    return user;
+    return this.toProfile(user);
   }
 
   public async findOneByCredentials({
@@ -109,7 +152,7 @@ export class UserPresenter {
   }: {
     username: string;
     password: string;
-  }): Promise<User | undefined> {
+  }): Promise<UserProfileResponseDto | undefined> {
     const user = await this.usersService.findOneUserEntity({ username });
 
     if (!user) {
@@ -118,20 +161,50 @@ export class UserPresenter {
 
     const isPasswordValid = await comparePassword(password, user.password);
 
-    return isPasswordValid ? user : undefined;
+    return isPasswordValid ? this.toProfile(user) : undefined;
   }
 
-  public async searchByQuery(query: string): Promise<User[]> {
+  public async findOneByJwt(jwtPayload: {
+    sub: number;
+    tokenVersion?: number;
+  }): Promise<UserProfileResponseDto | undefined> {
+    const user = await this.usersService.findOneUserEntity({
+      id: jwtPayload.sub,
+    });
+
+    if (!user) {
+      return undefined;
+    }
+
+    const tokenVersion = jwtPayload.tokenVersion ?? 0;
+
+    if (user.tokenVersion !== tokenVersion) {
+      return undefined;
+    }
+
+    return this.toProfile(user);
+  }
+
+  public async searchByQuery(query: string): Promise<UserProfileResponseDto[]> {
     if (!query) {
       return this.usersService.findManyUserEntity();
     }
 
     const likeQuery = `%${query}%`;
 
-    return this.usersService.findManyUserEntity([
+    const users = await this.usersService.findManyUserEntity([
       { username: ILike(likeQuery) },
       { email: ILike(likeQuery) },
       { about: ILike(likeQuery) },
     ] as FindOptionsWhere<User>[]);
+
+    return users.map((user) => {
+      return this.toProfile(user);
+    });
+  }
+
+  /** Инвалидирует все JWT пользователя: увеличивает tokenVersion в БД на 1 */
+  public async signout(userId: number): Promise<void> {
+    return this.usersService.incrementTokenVersionUserEntity(userId);
   }
 }

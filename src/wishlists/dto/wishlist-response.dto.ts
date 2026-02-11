@@ -1,13 +1,30 @@
-import type { UserProfileResponseDto } from '@/users/dto/user-profile-response.dto';
-import type { WishResponseDto } from '@/wishes/dto/wish-response.dto';
+import { ApiProperty } from '@nestjs/swagger';
 
-export type WishlistResponseDto = {
-  id: number;
-  createdAt: Date;
-  updatedAt: Date;
-  name: string;
+import type { UserPublicProfileResponseDto } from '@/users/dto/user-public-profile-response.dto';
+import type { WishPartialDto } from '@/wishes/dto/wish-partial.dto';
+
+export class WishlistResponseDto {
+  @ApiProperty({ example: 1 })
+  id!: number;
+
+  @ApiProperty()
+  createdAt!: Date;
+
+  @ApiProperty()
+  updatedAt!: Date;
+
+  @ApiProperty({ example: 'Мой вишлист', minLength: 0, maxLength: 250 })
+  name!: string;
+
+  @ApiProperty({ required: false })
   description?: string;
-  image: string;
-  owner: UserProfileResponseDto;
-  items: WishResponseDto[];
-};
+
+  @ApiProperty({ example: 'https://i.pravatar.cc/150?img=3' })
+  image!: string;
+
+  @ApiProperty()
+  owner!: UserPublicProfileResponseDto;
+
+  @ApiProperty({ type: 'array' })
+  items!: WishPartialDto[];
+}

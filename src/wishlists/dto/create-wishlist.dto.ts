@@ -13,8 +13,8 @@ import {
 
 export class CreateWishlistDto {
   @ApiProperty({
-    description: 'Wishlist name, string 1-250 characters',
-    example: 'My birthday wishlist',
+    description: 'Wishlist name',
+    example: 'Мой вишлист',
     minLength: 1,
     maxLength: 250,
   })
@@ -22,7 +22,7 @@ export class CreateWishlistDto {
   @IsNotEmpty()
   @MinLength(1)
   @MaxLength(250)
-  name: string;
+  name!: string;
 
   @ApiProperty({
     description: 'Wishlist description, string 0-1500 characters',
@@ -35,13 +35,13 @@ export class CreateWishlistDto {
   description?: string;
 
   @ApiProperty({
-    description: 'Wishlist cover image url, string',
-    example: 'https://example.com/image.jpg',
+    description: 'Wishlist cover image url',
+    example: 'https://i.pravatar.cc/150?img=3',
   })
   @IsString()
   @IsNotEmpty()
   @IsUrl()
-  image: string;
+  image!: string;
 
   @ApiProperty({
     description: 'IDs of existing wishes to add to the wishlist',

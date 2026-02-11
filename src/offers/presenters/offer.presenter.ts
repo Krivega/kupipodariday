@@ -5,6 +5,7 @@ import {
   offerAlreadyFundedException,
   offerAmountTooBigException,
   offerForOwnWishForbiddenException,
+  offerNotFoundException,
 } from '@/offers/exceptions';
 import { UserPresenter } from '@/users/presenters/user.presenter';
 import { wishNotFoundException } from '@/wishes/exceptions';
@@ -60,11 +61,21 @@ export class OfferPresenter {
 
   public async create(
     createOfferDto: CreateOfferDto & { user: { id: number } },
-  ): Promise<Offer> {
+  ): Promise<OfferResponseDto> {
     const wish = await this.validateCreateOffer(createOfferDto);
     const offer = this.offersService.createOfferEntity(createOfferDto, wish);
+    const saved = await this.offersService.saveOfferEntity(offer);
 
-    return this.offersService.saveOfferEntity(offer);
+    const fullOffer = await this.offersService.findOneOfferEntity(
+      { id: saved.id },
+      { relations: [...OFFER_VIEW_RELATIONS] },
+    );
+
+    if (!fullOffer) {
+      throw offerNotFoundException;
+    }
+
+    return this.buildOfferView(fullOffer);
   }
 
   public buildOffersView(
@@ -79,6 +90,8 @@ export class OfferPresenter {
   public buildOfferView(offer: Offer): OfferResponseDto {
     return {
       id: offer.id,
+      createdAt: offer.createdAt,
+      updatedAt: offer.updatedAt,
       amount: offer.amount,
       hidden: offer.hidden,
       item: offer.item,

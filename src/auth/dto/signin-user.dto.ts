@@ -8,23 +8,23 @@ import { IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator';
 export class SigninUserDto {
   @ApiProperty({
     description: 'Username',
-    example: 'johndoe',
+    example: 'exampleuser',
+    minLength: 1,
+    maxLength: 64,
+  })
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(1)
+  @MaxLength(64)
+  username!: string;
+
+  @ApiProperty({
+    description: 'Password',
+    example: 'somestrongpassword',
     minLength: 2,
-    maxLength: 30,
   })
   @IsString()
   @IsNotEmpty()
   @MinLength(2)
-  @MaxLength(30)
-  username: string;
-
-  @ApiProperty({
-    description: 'Password',
-    example: 'secret123',
-    minLength: 6,
-  })
-  @IsString()
-  @IsNotEmpty()
-  @MinLength(6)
-  password: string;
+  password!: string;
 }

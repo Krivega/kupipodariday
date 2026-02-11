@@ -2,11 +2,14 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Patch,
-  UseGuards,
   Post,
+  UseGuards,
 } from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { CurrentUser } from '@/auth/decorators/currentUser.decorator';
 import { AuthJwtGuard } from '@/auth/guards/jwt.guard';
@@ -15,87 +18,80 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UserProfileResponseDto } from './dto/user-profile-response.dto';
 import { UserPublicProfileResponseDto } from './dto/user-public-profile-response.dto';
 import { UserWishesDto } from './dto/user-wishes.dto';
-import { userNotFoundException } from './exceptions';
+import { UsernameParameterDto } from './dto/username-parameter.dto';
 import { UserPresenter } from './presenters/user.presenter';
 
 import type { AuthenticatedUser } from '@/auth/decorators/currentUser.decorator';
 
+@ApiTags('users')
 @UseGuards(AuthJwtGuard)
 @Controller('users')
 export class UsersController {
   public constructor(private readonly userPresenter: UserPresenter) {}
 
   @Post('find')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Search users by query' })
+  @ApiResponse({ status: 201, description: 'List of found users' })
   public async findMany(
     @Body() findUsersDto: FindUsersDto,
   ): Promise<UserProfileResponseDto[]> {
-    const users = await this.userPresenter.searchByQuery(findUsersDto.query);
-
-    return users.map((u) => {
-      return this.userPresenter.toProfile(u);
-    });
+    return this.userPresenter.searchByQuery(findUsersDto.query);
   }
 
   @Get('me')
+  @ApiOperation({ summary: 'Get current user profile' })
+  @ApiResponse({ status: 200, description: 'Current user profile' })
   public async findOwn(
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<UserProfileResponseDto> {
-    const own = await this.userPresenter.findOne({ id: user.id });
-
-    if (!own) {
-      throw userNotFoundException;
-    }
-
-    return this.userPresenter.toProfile(own);
+    return this.userPresenter.findOneProfile({ id: user.id });
   }
 
   @Patch('me')
+  @ApiOperation({ summary: 'Update current user profile' })
+  @ApiResponse({ status: 200, description: 'Updated user profile' })
+  @ApiResponse({
+    status: 400,
+    description: 'Ошибка валидации переданных значений',
+  })
   public async update(
     @CurrentUser() user: AuthenticatedUser,
     @Body() updateUserDto: UpdateUserDto,
   ): Promise<UserProfileResponseDto> {
     const id = Number(user.id);
-    const updated = await this.userPresenter.update({ id }, updateUserDto);
 
-    return this.userPresenter.toProfile(updated);
+    return this.userPresenter.update({ id }, updateUserDto);
   }
 
   @Get('me/wishes')
+  @ApiOperation({ summary: 'Get current user wishes' })
+  @ApiResponse({ status: 200, description: 'List of current user wishes' })
   public async getOwnWishes(
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<UserWishesDto[]> {
-    const own = await this.userPresenter.findOneWithWishes({ id: user.id });
-
-    if (!own) {
-      throw userNotFoundException;
-    }
-
-    return this.userPresenter.toWishes(own.wishes);
+    return this.userPresenter.findOneWithWishes({ id: user.id });
   }
 
   @Get(':username/wishes')
+  @ApiOperation({ summary: 'Get wishes by username' })
+  @ApiResponse({ status: 200, description: 'List of user wishes' })
   public async getWishes(
-    @Param('username') username: string,
+    @Param() params: UsernameParameterDto,
   ): Promise<UserWishesDto[]> {
-    const user = await this.userPresenter.findOneWithWishes({ username });
-
-    if (!user) {
-      throw userNotFoundException;
-    }
-
-    return this.userPresenter.toWishes(user.wishes);
+    return this.userPresenter.findOneWithWishes({
+      username: params.username,
+    });
   }
 
   @Get(':username')
+  @ApiOperation({ summary: 'Get public profile by username' })
+  @ApiResponse({ status: 200, description: 'User public profile' })
   public async findOne(
-    @Param('username') username: string,
+    @Param() params: UsernameParameterDto,
   ): Promise<UserPublicProfileResponseDto> {
-    const user = await this.userPresenter.findOne({ username });
-
-    if (!user) {
-      throw userNotFoundException;
-    }
-
-    return this.userPresenter.toPublicProfile(user);
+    return this.userPresenter.findOnePublicProfile({
+      username: params.username,
+    });
   }
 }

@@ -3,14 +3,14 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
-import { UsersService } from '@/users/users.service';
+import { AuthService } from './auth.service';
 import { unauthorizedException } from './exceptions';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   public constructor(
     configService: ConfigService,
-    private readonly usersService: UsersService,
+    private readonly authService: AuthService,
   ) {
     super({
       /* Указываем, что токен будет передаваться в заголовке Authorization в формате Bearer <token> */
@@ -27,23 +27,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
    * Проверка tokenVersion инвалидирует токены после выхода (signout).
    */
   public async validate(jwtPayload: { sub: number; tokenVersion?: number }) {
-    const user = await this.usersService.findOneUserEntity({
-      id: jwtPayload.sub,
-    });
+    const user = await this.authService.findOneByJwt(jwtPayload);
 
-    if (user === null) {
+    if (user === undefined) {
       throw unauthorizedException;
     }
 
-    const tokenVersion = jwtPayload.tokenVersion ?? 0;
-
-    if (user.tokenVersion !== tokenVersion) {
-      throw unauthorizedException;
-    }
-
-    /* Исключаем пароль из результата по соображениям безопасности */
-    const { password, ...result } = user;
-
-    return result;
+    return user;
   }
 }

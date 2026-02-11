@@ -13,6 +13,7 @@ import {
 import { WishesService } from '../wishes.service';
 
 import type { User } from '@/users/entities/user.entity';
+import type { WishPartialDto } from '../dto/wish-partial.dto';
 import type { WishResponseDto } from '../dto/wish-response.dto';
 
 const WISH_VIEW_RELATIONS = ['owner', 'offers', 'offers.user'] as const;
@@ -120,7 +121,7 @@ export class WishPresenter {
     await this.wishesService.updateWishEntity({ id }, updateWishDto);
   }
 
-  public async remove(id: number, userId: number): Promise<void> {
+  public async remove(id: number, userId: number): Promise<WishResponseDto> {
     const wish = await this.findOneForOwnerCheck(id);
 
     if (!wish) {
@@ -135,7 +136,20 @@ export class WishPresenter {
       throw wishChangePriceForbiddenException;
     }
 
+    const fullWish = await this.wishesService.findOneWishEntity(
+      { id },
+      { relations: [...WISH_VIEW_RELATIONS] },
+    );
+
+    if (!fullWish) {
+      throw wishNotFoundException;
+    }
+
+    const view = this.buildWishView(fullWish, userId);
+
     await this.wishesService.removeWishEntity({ id });
+
+    return view;
   }
 
   public async copy({
@@ -195,6 +209,29 @@ export class WishPresenter {
       updatedAt: wish.updatedAt,
       owner: this.userPresenter.toProfile(wish.owner),
       offers: this.offerPresenter.buildOffersView(wish.offers, currentUserId),
+    };
+  }
+
+  public buildWishPartialView(
+    wish: Wish,
+    currentUserId: number,
+  ): WishPartialDto {
+    const raised = this.offerPresenter.calculateRaised(
+      wish.offers,
+      currentUserId,
+    );
+
+    return {
+      id: wish.id,
+      createdAt: wish.createdAt,
+      updatedAt: wish.updatedAt,
+      name: wish.name,
+      link: wish.link,
+      image: wish.image,
+      price: Number(wish.price),
+      raised,
+      copied: wish.copied,
+      description: wish.description,
     };
   }
 }

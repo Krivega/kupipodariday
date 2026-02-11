@@ -19,6 +19,7 @@ const WISHLIST_VIEW_RELATIONS = [
   'items',
   'items.owner',
   'items.offers',
+  'items.offers.user',
 ] as const;
 const WISHLIST_OWNER_RELATION = ['owner'] as const;
 
@@ -98,7 +99,7 @@ export class WishlistPresenter {
     id: number,
     userId: number,
     updateWishlistDto: UpdateWishlistDto,
-  ): Promise<void> {
+  ): Promise<WishlistResponseDto> {
     const wishlist = await this.findOneForOwnerCheck(id);
 
     if (!wishlist) {
@@ -110,9 +111,23 @@ export class WishlistPresenter {
     }
 
     await this.wishlistsService.updateWishlistEntity({ id }, updateWishlistDto);
+
+    const updated = await this.wishlistsService.findOneWishlistEntity(
+      { id },
+      { relations: [...WISHLIST_VIEW_RELATIONS] },
+    );
+
+    if (!updated) {
+      throw wishlistNotFoundException;
+    }
+
+    return this.buildWishlistView(updated, userId);
   }
 
-  public async remove(id: number, userId: number): Promise<void> {
+  public async remove(
+    id: number,
+    userId: number,
+  ): Promise<WishlistResponseDto> {
     const wishlist = await this.findOneForOwnerCheck(id);
 
     if (!wishlist) {
@@ -123,7 +138,20 @@ export class WishlistPresenter {
       throw wishlistForbiddenException;
     }
 
+    const fullWishlist = await this.wishlistsService.findOneWishlistEntity(
+      { id },
+      { relations: [...WISHLIST_VIEW_RELATIONS] },
+    );
+
+    if (!fullWishlist) {
+      throw wishlistNotFoundException;
+    }
+
+    const view = this.buildWishlistView(fullWishlist, userId);
+
     await this.wishlistsService.removeWishlistEntity({ id });
+
+    return view;
   }
 
   public buildWishlistView(
@@ -137,9 +165,9 @@ export class WishlistPresenter {
       name: wishlist.name,
       description: wishlist.description,
       image: wishlist.image,
-      owner: this.userPresenter.toProfile(wishlist.owner),
+      owner: this.userPresenter.toPublicProfile(wishlist.owner),
       items: wishlist.items.map((item) => {
-        return this.wishPresenter.buildWishView(item, currentUserId);
+        return this.wishPresenter.buildWishPartialView(item, currentUserId);
       }),
     };
   }

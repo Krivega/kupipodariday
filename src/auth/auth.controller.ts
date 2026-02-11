@@ -1,66 +1,77 @@
 import {
-  Controller,
-  Post,
   Body,
-  UseGuards,
+  Controller,
   HttpCode,
   HttpStatus,
+  Post,
+  UseGuards,
 } from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { CreateUserDto } from '@/users/dto/create-user.dto';
-import { userAlreadyExistsException } from '@/users/exceptions';
-import { UsersService } from '@/users/users.service';
 import { AuthService } from './auth.service';
 import { CurrentUser } from './decorators/currentUser.decorator';
+import {
+  SigninUserResponseDto,
+  SignupUserResponseDto,
+} from './dto/auth-response.dto';
+import { SigninUserDto } from './dto/signin-user.dto';
 import { AuthLocalGuard } from './guards/auth.guard';
 import { AuthJwtGuard } from './guards/jwt.guard';
 
 import type { AuthenticatedUser } from './decorators/currentUser.decorator';
 
+@ApiTags('auth')
 @Controller()
 export class AuthController {
-  public constructor(
-    private readonly authService: AuthService,
-    private readonly usersService: UsersService,
-  ) {}
+  public constructor(private readonly authService: AuthService) {}
 
-  /**
-   * Стратегия local автоматически достанет username и password из тела запроса
-   * Если пароль будет верным, данные пользователя окажутся в объекте req.user
-   */
-  @UseGuards(AuthLocalGuard)
   @Post('signin')
-  public async signin(@CurrentUser() user: AuthenticatedUser) {
-    /* Генерируем для пользователя JWT-токен (в payload — tokenVersion для инвалидации при выходе) */
+  @HttpCode(HttpStatus.CREATED)
+  @UseGuards(AuthLocalGuard)
+  @ApiOperation({ summary: 'Sign in' })
+  @ApiResponse({
+    status: 201,
+    description: 'JWT access token',
+    type: SigninUserResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Некорректная пара логин и пароль',
+  })
+  public async signin(
+    @Body() _signinUserDto: SigninUserDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<SigninUserResponseDto> {
     return this.authService.auth({
       id: user.id,
       tokenVersion: user.tokenVersion,
     });
   }
 
-  /**
-   * Выход: увеличиваем tokenVersion пользователя — все старые JWT перестают приниматься.
-   * Клиенту следует удалить сохранённый access_token после успешного ответа.
-   */
-  @UseGuards(AuthJwtGuard)
   @Post('signout')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(AuthJwtGuard)
+  @ApiOperation({ summary: 'Sign out' })
   public async signout(@CurrentUser() user: AuthenticatedUser): Promise<void> {
     await this.authService.signout(user.id);
   }
 
   @Post('signup')
-  public async signup(@Body() createUserDto: CreateUserDto) {
-    const isUserExistsByUsernameOrEmail =
-      await this.usersService.hasExistsUserEntity([
-        { username: createUserDto.username },
-        { email: createUserDto.email },
-      ]);
-
-    if (isUserExistsByUsernameOrEmail) {
-      throw userAlreadyExistsException;
-    }
-
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Sign up' })
+  @ApiResponse({
+    status: 201,
+    description: 'Created user profile',
+    type: SignupUserResponseDto,
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Пользователь с таким email или username уже зарегистрирован',
+  })
+  public async signup(
+    @Body() createUserDto: CreateUserDto,
+  ): Promise<SignupUserResponseDto> {
     return this.authService.signup(createUserDto);
   }
 }
