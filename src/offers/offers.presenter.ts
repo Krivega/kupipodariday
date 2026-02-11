@@ -18,7 +18,7 @@ import type { Wish } from '@/wishes/entities/wish.entity';
 import type { OfferResponseDto } from './dto/offer-response.dto';
 import type { Offer } from './entities/offer.entity';
 
-const OFFER_VIEW_RELATIONS = ['user', 'item'] as const;
+const OFFER_VIEW_RELATIONS = ['user', 'item', 'item.owner'] as const;
 
 @Injectable()
 export class OffersPresenter {
@@ -61,7 +61,7 @@ export class OffersPresenter {
       return undefined;
     }
 
-    return this.buildOfferView(offer);
+    return this.buildOfferView(offer, currentUserId);
   }
 
   public async create(
@@ -96,7 +96,7 @@ export class OffersPresenter {
       throw offerNotFoundException;
     }
 
-    return this.buildOfferView(fullOffer);
+    return this.buildOfferView(fullOffer, createOfferDto.user.id);
   }
 
   public buildOffersView(
@@ -104,11 +104,11 @@ export class OffersPresenter {
     currentUserId: number,
   ): OfferResponseDto[] {
     return this.getVisibleOffers(offers, currentUserId).map((offer) => {
-      return this.buildOfferView(offer);
+      return this.buildOfferView(offer, currentUserId);
     });
   }
 
-  public buildOfferView(offer: Offer): OfferResponseDto {
+  public buildOfferView(offer: Offer, currentUserId: number): OfferResponseDto {
     return {
       id: offer.id,
       createdAt: offer.createdAt,
@@ -116,7 +116,10 @@ export class OffersPresenter {
       amount: offer.amount,
       hidden: offer.hidden,
       item: this.wishPresenter.buildWishPartialView(offer.item),
-      user: this.userPresenter.toProfile(offer.user),
+      user:
+        offer.item.owner.id === currentUserId
+          ? this.userPresenter.toProfile(offer.user)
+          : this.userPresenter.toPublicProfile(offer.user),
     };
   }
 

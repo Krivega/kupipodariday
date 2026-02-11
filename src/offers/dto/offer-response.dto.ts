@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 import { UserProfileResponseDto } from '@/users/dto/user-profile-response.dto';
+import { UserPublicProfileResponseDto } from '@/users/dto/user-public-profile-response.dto';
 import { WishPartialDto } from '@/wishes/dto/wish-partial.dto';
 
 export class OfferResponseDto {
@@ -28,9 +29,10 @@ export class OfferResponseDto {
   item!: WishPartialDto;
 
   @ApiProperty({
+    description: 'Contributor (public profile; email only for wish owner)',
     type: () => {
-      return UserProfileResponseDto;
+      return UserPublicProfileResponseDto;
     },
   })
-  user!: UserProfileResponseDto;
+  user!: UserPublicProfileResponseDto | UserProfileResponseDto;
 }
