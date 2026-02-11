@@ -36,11 +36,11 @@ export class UsersController {
   @ApiResponse({
     status: 201,
     description: 'List of found users',
-    type: [UserProfileResponseDto],
+    type: [UserPublicProfileResponseDto],
   })
   public async findMany(
     @Body() findUsersDto: FindUsersDto,
-  ): Promise<UserProfileResponseDto[]> {
+  ): Promise<UserPublicProfileResponseDto[]> {
     return this.userPresenter.searchByQuery(findUsersDto.query);
   }
 

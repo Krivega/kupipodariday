@@ -237,9 +237,12 @@ export class UsersPresenter {
     return this.toProfile(user);
   }
 
-  public async searchByQuery(query: string): Promise<UserProfileResponseDto[]> {
+  public async searchByQuery(
+    query: string,
+  ): Promise<UserPublicProfileResponseDto[]> {
     if (!query) {
-      return this.usersService.findManyUserEntity();
+      const users = await this.usersService.findManyUserEntity();
+      return users.map((user) => this.toPublicProfile(user));
     }
 
     const likeQuery = `%${query}%`;
@@ -250,9 +253,7 @@ export class UsersPresenter {
       { about: ILike(likeQuery) },
     ] as FindOptionsWhere<User>[]);
 
-    return users.map((user) => {
-      return this.toProfile(user);
-    });
+    return users.map((user) => this.toPublicProfile(user));
   }
 
   /** Инвалидирует все JWT пользователя: увеличивает tokenVersion в БД на 1 */
