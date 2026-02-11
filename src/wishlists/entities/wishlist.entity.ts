@@ -1,4 +1,10 @@
-import { IsOptional, IsString, MinLength, MaxLength, IsUrl } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  MinLength,
+  MaxLength,
+  IsUrl,
+} from 'class-validator';
 import {
   CreateDateColumn,
   Entity,

@@ -2,6 +2,7 @@
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 
+import { Wish } from '@/wishes/entities/wish.entity';
 import { Wishlist } from '../entities/wishlist.entity';
 import { WishlistsService } from '../wishlists.service';
 
@@ -14,6 +15,7 @@ import type { UpdateWishlistDto } from '../dto/update-wishlist.dto';
 describe('WishlistsService', () => {
   let service: WishlistsService;
   let repository: jest.Mocked<Repository<Wishlist>>;
+  let wishRepository: jest.Mocked<Repository<Wish>>;
 
   const mockWishlist: Wishlist = {
     id: 1,
@@ -36,6 +38,10 @@ describe('WishlistsService', () => {
       delete: jest.fn(),
     };
 
+    const mockWishRepository = {
+      update: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         WishlistsService,
@@ -43,11 +49,18 @@ describe('WishlistsService', () => {
           provide: getRepositoryToken(Wishlist),
           useValue: mockRepository,
         },
+        {
+          provide: getRepositoryToken(Wish),
+          useValue: mockWishRepository,
+        },
       ],
     }).compile();
 
     service = module.get<WishlistsService>(WishlistsService);
     repository = module.get(getRepositoryToken(Wishlist));
+    wishRepository = module.get(getRepositoryToken(Wish)) as jest.Mocked<
+      Repository<Wish>
+    >;
   });
 
   afterEach(() => {
@@ -69,12 +82,54 @@ describe('WishlistsService', () => {
 
       (repository.create as jest.Mock).mockReturnValue(mockWishlist);
       (repository.save as jest.Mock).mockResolvedValue(mockWishlist);
+      (repository.findOne as jest.Mock).mockResolvedValue(mockWishlist);
 
       const result = await service.create(dto);
 
-      expect(repository.create).toHaveBeenCalledWith(dto);
+      expect(repository.create).toHaveBeenCalledWith({
+        name: 'My wishlist',
+        description: 'Description',
+        image: 'https://example.com/image.jpg',
+        owner: { id: 1 },
+      });
       expect(repository.save).toHaveBeenCalledWith(mockWishlist);
+      expect(repository.findOne).toHaveBeenCalledWith({
+        where: { id: mockWishlist.id },
+        relations: ['owner', 'items'],
+      });
       expect(result).toEqual(mockWishlist);
+    });
+
+    it('should create wishlist and link existing wishes by itemsId', async () => {
+      const dto = {
+        name: 'My wishlist',
+        description: 'Description',
+        image: 'https://example.com/image.jpg',
+        owner: { id: 1 },
+        itemsId: [10, 20],
+      } as unknown as CreateWishlistDto & { owner: User };
+
+      (repository.create as jest.Mock).mockReturnValue(mockWishlist);
+      (repository.save as jest.Mock).mockResolvedValue(mockWishlist);
+      (repository.findOne as jest.Mock).mockResolvedValue({
+        ...mockWishlist,
+        items: [{ id: 10 }, { id: 20 }],
+      });
+      wishRepository.update.mockResolvedValue({
+        affected: 2,
+        raw: [],
+        generatedMaps: [],
+      });
+
+      const result = await service.create(dto);
+
+      expect(wishRepository.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          owner: { id: 1 },
+        }),
+        { wishlist: mockWishlist },
+      );
+      expect(result.items).toHaveLength(2);
     });
   });
 

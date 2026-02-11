@@ -7,12 +7,12 @@ import {
   offerAmountTooBigException,
   offerForOwnWishForbiddenException,
 } from '@/offers/exceptions';
+import { toUserProfileResponseDto } from '@/users/dto/user-profile-response.dto';
 import { wishNotFoundException } from '@/wishes/exceptions';
 import { WishesService } from '@/wishes/wishes.service';
 import { CreateOfferDto } from './dto/create-offer.dto';
 import { Offer } from './entities/offer.entity';
 
-import type { User } from '@/users/entities/user.entity';
 import type { Wish } from '@/wishes/entities/wish.entity';
 
 export type OfferView = {
@@ -66,8 +66,8 @@ export class OffersService {
     const offer = this.offersRepository.create({
       amount: createOfferDto.amount,
       hidden: createOfferDto.hidden ?? false,
-      item: { id: wish.id } as Wish,
-      user: { id: createOfferDto.user.id } as User,
+      item: { id: wish.id },
+      user: { id: createOfferDto.user.id },
     });
 
     return this.offersRepository.save(offer);
@@ -94,10 +94,23 @@ export class OffersService {
   }
 
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
-  public buildOffersViewForUser(offers: Offer[], currentUserId: number) {
-    return offers.filter((offer) => {
-      return hasVisibleOffer(offer, currentUserId);
-    });
+  public buildOffersViewForUser(
+    offers: Offer[] | undefined,
+    currentUserId: number,
+  ) {
+    return (offers ?? [])
+      .filter((offer) => {
+        return hasVisibleOffer(offer, currentUserId);
+      })
+      .map((offer) => {
+        return {
+          id: offer.id,
+          amount: offer.amount,
+          hidden: offer.hidden,
+          item: offer.item,
+          user: toUserProfileResponseDto(offer.user),
+        };
+      });
   }
 
   /**

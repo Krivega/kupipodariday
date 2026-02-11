@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindManyOptions, FindOptionsWhere } from 'typeorm';
 
 import { OffersService } from '@/offers/offers.service';
+import { toUserProfileResponseDto } from '@/users/dto/user-profile-response.dto';
 import { CreateWishDto } from './dto/create-wish.dto';
 import { UpdateWishDto } from './dto/update-wish.dto';
 import { Wish } from './entities/wish.entity';
@@ -100,7 +101,7 @@ export class WishesService {
       description: wish.description,
       createdAt: wish.createdAt,
       updatedAt: wish.updatedAt,
-      owner: wish.owner,
+      owner: toUserProfileResponseDto(wish.owner),
       offers: this.offersService.buildOffersViewForUser(
         wish.offers,
         currentUserId,

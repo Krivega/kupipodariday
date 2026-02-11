@@ -1,5 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
+  IsArray,
+  IsInt,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -39,4 +42,18 @@ export class CreateWishlistDto {
   @IsNotEmpty()
   @IsUrl()
   image: string;
+
+  @ApiProperty({
+    description: 'IDs of existing wishes to add to the wishlist',
+    type: [Number],
+    required: false,
+    example: [1, 2, 3],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsInt({ each: true })
+  @Type(() => {
+    return Number;
+  })
+  itemsId?: number[];
 }

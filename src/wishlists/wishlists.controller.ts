@@ -39,16 +39,20 @@ export class WishlistsController {
   }
 
   @Get()
-  public async findAll() {
+  public async findAll(@CurrentUser() user: AuthenticatedUser) {
     return this.wishlistsService.findMany(
+      user.id,
       {},
-      { relations: ['owner', 'items'] },
+      { relations: ['owner', 'items', 'items.owner', 'items.offers'] },
     );
   }
 
   @Get(':id')
   public async findOne(@Param('id') id: string) {
-    const wishlist = await this.wishlistsService.findOne({ id: Number(id) });
+    const wishlist = await this.wishlistsService.findOne(
+      { id: Number(id) },
+      { relations: ['owner', 'items'] },
+    );
 
     if (!wishlist) {
       throw wishlistNotFoundException;

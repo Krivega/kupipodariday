@@ -23,13 +23,14 @@ import { WishesService } from './wishes.service';
 import type { AuthenticatedUser } from '@/auth/decorators/currentUser.decorator';
 import type { User } from '@/users/entities/user.entity';
 
+@UseGuards(AuthJwtGuard)
 @Controller('wishes')
 export class WishesController {
   public constructor(private readonly wishesService: WishesService) {}
 
   @Get('last')
-  public async getLast() {
-    return this.wishesService.findMany(
+  public async getLast(@CurrentUser() user: AuthenticatedUser) {
+    const allWishes = await this.wishesService.findMany(
       {},
       {
         relations: ['owner'],
@@ -39,11 +40,15 @@ export class WishesController {
         },
       },
     );
+
+    return allWishes.map((wish) => {
+      return this.wishesService.buildWishViewForUser(wish, user.id);
+    });
   }
 
   @Get('top')
-  public async getTop() {
-    return this.wishesService.findMany(
+  public async getTop(@CurrentUser() user: AuthenticatedUser) {
+    const allWishes = await this.wishesService.findMany(
       {},
       {
         relations: ['owner'],
@@ -53,9 +58,12 @@ export class WishesController {
         },
       },
     );
+
+    return allWishes.map((wish) => {
+      return this.wishesService.buildWishViewForUser(wish, user.id);
+    });
   }
 
-  @UseGuards(AuthJwtGuard)
   @Get(':id')
   public async findOne(
     @CurrentUser() user: AuthenticatedUser,
@@ -73,7 +81,6 @@ export class WishesController {
     return this.wishesService.buildWishViewForUser(wish, user.id);
   }
 
-  @UseGuards(AuthJwtGuard)
   @Patch(':id')
   public async update(
     @CurrentUser() user: AuthenticatedUser,
@@ -102,7 +109,6 @@ export class WishesController {
     return this.wishesService.update({ id: Number(id) }, updateWishDto);
   }
 
-  @UseGuards(AuthJwtGuard)
   @Delete(':id')
   public async remove(
     @CurrentUser() user: AuthenticatedUser,
@@ -130,7 +136,6 @@ export class WishesController {
     return this.wishesService.remove({ id: Number(id) });
   }
 
-  @UseGuards(AuthJwtGuard)
   @Post(':id/copy')
   public async copy(
     @CurrentUser() user: AuthenticatedUser,
@@ -145,18 +150,19 @@ export class WishesController {
       throw wishNotFoundException;
     }
 
-    return wish;
+    return this.wishesService.buildWishViewForUser(wish, user.id);
   }
 
-  @UseGuards(AuthJwtGuard)
   @Post()
   public async create(
     @CurrentUser() user: AuthenticatedUser,
     @Body() createWishDto: CreateWishDto,
   ) {
-    return this.wishesService.create({
+    const wish = await this.wishesService.create({
       ...createWishDto,
       owner: { id: user.id } as User,
     });
+
+    return this.wishesService.buildWishViewForUser(wish, user.id);
   }
 }
