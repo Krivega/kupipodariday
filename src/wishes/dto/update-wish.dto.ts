@@ -1,21 +1,8 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { PartialType } from '@nestjs/swagger';
+
+import { CreateWishDto } from './create-wish.dto';
 
 /**
- * Все поля опциональны. Спецификация требует пустой объект свойств.
+ * Все поля опциональны. Наследует валидаторы от CreateWishDto.
  */
-export class UpdateWishDto {
-  @ApiPropertyOptional()
-  name?: string;
-
-  @ApiPropertyOptional()
-  link?: string;
-
-  @ApiPropertyOptional()
-  image?: string;
-
-  @ApiPropertyOptional()
-  price?: number;
-
-  @ApiPropertyOptional()
-  description?: string;
-}
+export class UpdateWishDto extends PartialType(CreateWishDto) {}
