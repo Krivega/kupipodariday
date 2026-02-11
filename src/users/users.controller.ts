@@ -13,6 +13,7 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { CurrentUser } from '@/auth/decorators/currentUser.decorator';
 import { AuthJwtGuard } from '@/auth/guards/jwt.guard';
+import { WishResponseDto } from '@/wishes/dto/wish-response.dto';
 import { FindUsersDto } from './dto/find-users.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserProfileResponseDto } from './dto/user-profile-response.dto';
@@ -66,22 +67,32 @@ export class UsersController {
 
   @Get('me/wishes')
   @ApiOperation({ summary: 'Get current user wishes' })
-  @ApiResponse({ status: 200, description: 'List of current user wishes' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of current user wishes',
+    type: [WishResponseDto],
+  })
   public async getOwnWishes(
     @CurrentUser() user: AuthenticatedUser,
-  ): Promise<UserWishesDto[]> {
-    return this.userPresenter.findOneWithWishes({ id: user.id });
+  ): Promise<WishResponseDto[]> {
+    return this.userPresenter.findOwnWishes(user.id);
   }
 
   @Get(':username/wishes')
   @ApiOperation({ summary: 'Get wishes by username' })
-  @ApiResponse({ status: 200, description: 'List of user wishes' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of user wishes',
+    type: [UserWishesDto],
+  })
   public async getWishes(
+    @CurrentUser() user: AuthenticatedUser,
     @Param() params: UsernameParameterDto,
   ): Promise<UserWishesDto[]> {
-    return this.userPresenter.findOneWithWishes({
-      username: params.username,
-    });
+    return this.userPresenter.findOneWithWishes(
+      { username: params.username },
+      user.id,
+    );
   }
 
   @Get(':username')

@@ -80,6 +80,19 @@ export class WishPresenter {
     );
   }
 
+  public async findOneForOfferValidation(id: number): Promise<Wish> {
+    const wish = await this.wishesService.findOneWishEntity(
+      { id },
+      { relations: [...WISH_VIEW_RELATIONS] },
+    );
+
+    if (!wish) {
+      throw wishNotFoundException;
+    }
+
+    return wish;
+  }
+
   public async create(
     createWishDto: CreateWishDto & { owner: { id: number } },
   ): Promise<WishResponseDto> {
@@ -87,16 +100,16 @@ export class WishPresenter {
       ...createWishDto,
       owner: createWishDto.owner as User,
     });
-    const full = await this.wishesService.findOneWishEntity(
+    const fullWish = await this.wishesService.findOneWishEntity(
       { id: wish.id },
       { relations: [...WISH_VIEW_RELATIONS] },
     );
 
-    if (!full) {
+    if (!fullWish) {
       throw wishNotFoundException;
     }
 
-    return this.buildWishView(full, createWishDto.owner.id);
+    return this.buildWishView(fullWish, createWishDto.owner.id);
   }
 
   public async update(

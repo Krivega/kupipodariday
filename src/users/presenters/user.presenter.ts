@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/class-methods-use-this */
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { FindOptionsWhere, ILike } from 'typeorm';
 
+import { OfferPresenter } from '@/offers/presenters/offer.presenter';
+import { WishResponseDto } from '@/wishes/dto/wish-response.dto';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { UserProfileResponseDto } from '../dto/user-profile-response.dto';
@@ -17,9 +19,30 @@ import { UsersService } from '../users.service';
 import type { Wish } from '@/wishes/entities/wish.entity';
 import type { User } from '../entities/user.entity';
 
+const USER_WISHES_RELATIONS = [
+  'wishes',
+  'wishes.offers',
+  'wishes.offers.user',
+] as const;
+
+const USER_OWN_WISHES_RELATIONS = [
+  'wishes',
+  'wishes.owner',
+  'wishes.offers',
+  'wishes.offers.user',
+] as const;
+
 @Injectable()
 export class UserPresenter {
-  public constructor(private readonly usersService: UsersService) {}
+  public constructor(
+    private readonly usersService: UsersService,
+    @Inject(
+      forwardRef(() => {
+        return OfferPresenter;
+      }),
+    )
+    private readonly offerPresenter: OfferPresenter,
+  ) {}
 
   public toProfile(user: User): UserProfileResponseDto {
     return {
@@ -44,8 +67,34 @@ export class UserPresenter {
     };
   }
 
-  public toWishes(wishes: Wish[]): UserWishesDto[] {
+  public buildWishResponse(wish: Wish, currentUserId: number): WishResponseDto {
+    const raised = this.offerPresenter.calculateRaised(
+      wish.offers,
+      currentUserId,
+    );
+
+    return {
+      id: wish.id,
+      name: wish.name,
+      link: wish.link,
+      image: wish.image,
+      price: wish.price,
+      raised,
+      description: wish.description,
+      createdAt: wish.createdAt,
+      updatedAt: wish.updatedAt,
+      owner: this.toProfile(wish.owner),
+      offers: this.offerPresenter.buildOffersView(wish.offers, currentUserId),
+    };
+  }
+
+  public toWishes(wishes: Wish[], currentUserId: number): UserWishesDto[] {
     return wishes.map((wish) => {
+      const raised = this.offerPresenter.calculateRaised(
+        wish.offers,
+        currentUserId,
+      );
+
       return {
         id: wish.id,
         createdAt: wish.createdAt,
@@ -54,9 +103,10 @@ export class UserPresenter {
         link: wish.link,
         image: wish.image,
         price: Number(wish.price),
-        raised: Number(wish.raised),
+        raised,
         copied: wish.copied,
         description: wish.description,
+        offers: this.offerPresenter.buildOffersView(wish.offers, currentUserId),
       };
     });
   }
@@ -85,18 +135,34 @@ export class UserPresenter {
     return this.toProfile(user);
   }
 
+  public async findOwnWishes(userId: number): Promise<WishResponseDto[]> {
+    const user = await this.usersService.findOneUserEntity(
+      { id: userId },
+      { relations: [...USER_OWN_WISHES_RELATIONS] },
+    );
+
+    if (!user) {
+      throw userNotFoundException;
+    }
+
+    return user.wishes.map((wish) => {
+      return this.buildWishResponse(wish, userId);
+    });
+  }
+
   public async findOneWithWishes(
     filter: FindOptionsWhere<User>,
+    currentUserId: number,
   ): Promise<UserWishesDto[]> {
     const user = await this.usersService.findOneUserEntity(filter, {
-      relations: ['wishes'],
+      relations: [...USER_WISHES_RELATIONS],
     });
 
     if (!user) {
       throw userNotFoundException;
     }
 
-    return this.toWishes(user.wishes);
+    return this.toWishes(user.wishes, currentUserId);
   }
 
   public async create(

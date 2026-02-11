@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 
+import { OfferResponseDto } from '@/offers/dto/offer-response.dto';
+
 export class UserWishesDto {
   @ApiProperty({ example: 1 })
   id!: number;
@@ -30,4 +32,7 @@ export class UserWishesDto {
 
   @ApiProperty({ example: 'Description text', minLength: 1, maxLength: 1024 })
   description!: string;
+
+  @ApiProperty({ type: () => OfferResponseDto, isArray: true })
+  offers!: OfferResponseDto[];
 }

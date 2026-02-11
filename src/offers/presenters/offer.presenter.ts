@@ -8,8 +8,7 @@ import {
   offerNotFoundException,
 } from '@/offers/exceptions';
 import { UserPresenter } from '@/users/presenters/user.presenter';
-import { wishNotFoundException } from '@/wishes/exceptions';
-import { WishesService } from '@/wishes/wishes.service';
+import { WishPresenter } from '@/wishes/presenters/wish.presenter';
 import { CreateOfferDto } from '../dto/create-offer.dto';
 import { OffersService } from '../offers.service';
 
@@ -25,10 +24,10 @@ export class OfferPresenter {
     private readonly offersService: OffersService,
     @Inject(
       forwardRef(() => {
-        return WishesService;
+        return WishPresenter;
       }),
     )
-    private readonly wishesService: WishesService,
+    private readonly wishPresenter: WishPresenter,
     private readonly userPresenter: UserPresenter,
   ) {}
 
@@ -109,14 +108,9 @@ export class OfferPresenter {
   private async validateCreateOffer(
     createOfferDto: CreateOfferDto & { user: { id: number } },
   ): Promise<Wish> {
-    const wish = await this.wishesService.findOneWishEntity(
-      { id: createOfferDto.itemId },
-      { relations: ['owner', 'offers', 'offers.user'] },
+    const wish = await this.wishPresenter.findOneForOfferValidation(
+      createOfferDto.itemId,
     );
-
-    if (!wish) {
-      throw wishNotFoundException;
-    }
 
     this.ensureUserCanContributeToWish({
       wish,
