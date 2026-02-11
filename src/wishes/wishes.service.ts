@@ -11,7 +11,7 @@ import { CreateWishDto } from './dto/create-wish.dto';
 import { UpdateWishDto } from './dto/update-wish.dto';
 import { Wish } from './entities/wish.entity';
 
-import type { User } from '@/users/entities/user.entity';
+import type { UserIdRef } from '@/users/types/user-id-ref.type';
 
 @Injectable()
 export class WishesService {
@@ -21,7 +21,7 @@ export class WishesService {
   ) {}
 
   public createWishEntity(
-    createWishDto: CreateWishDto & { owner: User },
+    createWishDto: CreateWishDto & { owner: UserIdRef },
   ): Wish {
     return this.wishRepository.create(createWishDto);
   }
@@ -74,7 +74,7 @@ export class WishesService {
   }
 
   public async createWish(
-    createWishDto: CreateWishDto & { owner: User },
+    createWishDto: CreateWishDto & { owner: UserIdRef },
   ): Promise<Wish> {
     const wish = this.createWishEntity(createWishDto);
 

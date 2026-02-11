@@ -7,7 +7,7 @@ import { CreateWishlistDto } from './dto/create-wishlist.dto';
 import { UpdateWishlistDto } from './dto/update-wishlist.dto';
 import { Wishlist } from './entities/wishlist.entity';
 
-import type { User } from '@/users/entities/user.entity';
+import type { UserIdRef } from '@/users/types/user-id-ref.type';
 
 @Injectable()
 export class WishlistsService {
@@ -19,7 +19,7 @@ export class WishlistsService {
   ) {}
 
   public createWishlistEntity(
-    createWishlistDto: CreateWishlistDto & { owner: User },
+    createWishlistDto: CreateWishlistDto & { owner: UserIdRef },
   ): Wishlist {
     const { itemsId, owner, ...wishlistData } = createWishlistDto;
 

@@ -19,7 +19,7 @@ export class WishResponseDto {
   @ApiProperty({ example: 99.99, minimum: 1 })
   price!: number;
 
-  @ApiProperty({ example: 0, minimum: 1 })
+  @ApiProperty({ example: 0, minimum: 0 })
   raised!: number;
 
   @ApiProperty({ example: 0 })

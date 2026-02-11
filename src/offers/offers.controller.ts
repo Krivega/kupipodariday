@@ -19,7 +19,6 @@ import { offerNotFoundException } from './exceptions';
 import { OffersPresenter } from './offers.presenter';
 
 import type { AuthenticatedUser } from '@/auth/decorators/currentUser.decorator';
-import type { User } from '@/users/entities/user.entity';
 
 @ApiTags('offers')
 @UseGuards(AuthJwtGuard)
@@ -37,7 +36,7 @@ export class OffersController {
   ): Promise<OfferResponseDto> {
     return this.offerPresenter.create({
       ...createOfferDto,
-      user: { id: user.id } as User,
+      user: { id: user.id },
     });
   }
 

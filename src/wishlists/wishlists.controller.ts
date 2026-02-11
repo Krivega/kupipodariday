@@ -22,7 +22,6 @@ import { wishlistNotFoundException } from './exceptions';
 import { WishlistsPresenter } from './wishlists.presenter';
 
 import type { AuthenticatedUser } from '@/auth/decorators/currentUser.decorator';
-import type { User } from '@/users/entities/user.entity';
 
 @ApiTags('wishlistlists')
 @UseGuards(AuthJwtGuard)
@@ -55,7 +54,7 @@ export class WishlistsController {
   ): Promise<WishlistResponseDto> {
     return this.wishlistPresenter.create({
       ...createWishlistDto,
-      owner: { id: user.id } as User,
+      owner: { id: user.id },
     });
   }
 

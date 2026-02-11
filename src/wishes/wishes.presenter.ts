@@ -12,7 +12,6 @@ import {
 } from './exceptions';
 import { WishesService } from './wishes.service';
 
-import type { User } from '@/users/entities/user.entity';
 import type { WishPartialDto } from './dto/wish-partial.dto';
 import type { WishResponseDto } from './dto/wish-response.dto';
 
@@ -98,7 +97,7 @@ export class WishesPresenter {
   ): Promise<WishResponseDto> {
     const wish = await this.wishesService.createWish({
       ...createWishDto,
-      owner: createWishDto.owner as User,
+      owner: createWishDto.owner,
     });
     const fullWish = await this.wishesService.findOneWishEntity(
       { id: wish.id },
@@ -189,7 +188,7 @@ export class WishesPresenter {
       image: wish.image,
       price: wish.price,
       description: wish.description,
-      owner: { id: userId } as User,
+      owner: { id: userId },
     });
 
     const fullWish = await this.wishesService.findOneWishEntity(

@@ -11,7 +11,7 @@ import {
 } from './exceptions';
 import { WishlistsService } from './wishlists.service';
 
-import type { User } from '@/users/entities/user.entity';
+import type { UserIdRef } from '@/users/types/user-id-ref.type';
 import type { WishlistResponseDto } from './dto/wishlist-response.dto';
 
 const WISHLIST_VIEW_RELATIONS = [
@@ -67,7 +67,7 @@ export class WishlistsPresenter {
   }
 
   public async create(
-    createWishlistDto: CreateWishlistDto & { owner: User },
+    createWishlistDto: CreateWishlistDto & { owner: UserIdRef },
   ): Promise<WishlistResponseDto> {
     const wishlist =
       this.wishlistsService.createWishlistEntity(createWishlistDto);
