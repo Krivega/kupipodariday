@@ -13,7 +13,8 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
-  OneToMany,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
 
 import { User } from '@/users/entities/user.entity';
@@ -47,19 +48,29 @@ export class Wishlist {
   @IsUrl()
   image!: string; // обложка для подборки, строка. Должна быть валидным URL.
 
-  @ManyToOne(() => {
-    return User;
-  })
-  @JoinColumn()
+  @ManyToOne(
+    () => {
+      return User;
+    },
+    (user) => {
+      return user.wishlists;
+    },
+  )
+  @JoinColumn({ name: 'owner_id' })
   owner: User; // ссылка на пользователя, который создал подборку.
 
-  @OneToMany(
+  @ManyToMany(
     () => {
       return Wish;
     },
     (wish) => {
-      return wish.wishlist;
+      return wish.wishlists;
     },
   )
+  @JoinTable({
+    name: 'wishlist_items',
+    joinColumn: { name: 'wishlist_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'wish_id', referencedColumnName: 'id' },
+  })
   items: Wish[]; // набор ссылок на подарки
 }

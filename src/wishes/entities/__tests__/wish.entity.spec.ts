@@ -16,7 +16,7 @@ describe('Wish (schema)', () => {
     'copied',
     'description',
   ];
-  const expectedRelationNames = ['owner', 'offers', 'wishlist'];
+  const expectedRelationNames = ['owner', 'offers', 'wishlists'];
 
   describe('metadata', () => {
     it('entity is registered in TypeORM', () => {

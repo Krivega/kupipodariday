@@ -17,6 +17,7 @@ import {
   ManyToOne,
   JoinColumn,
   OneToMany,
+  ManyToMany,
 } from 'typeorm';
 
 import { Offer } from '@/offers/entities/offer.entity';
@@ -91,7 +92,7 @@ export class Wish {
   )
   offers: Offer[]; // массив ссылок на заявки скинуться от других пользователей.
 
-  @ManyToOne(
+  @ManyToMany(
     () => {
       return Wishlist;
     },
@@ -99,6 +100,5 @@ export class Wish {
       return wishlist.items;
     },
   )
-  @JoinColumn({ name: 'wishlist_id' })
-  wishlist: Wishlist;
+  wishlists: Wishlist[]; // вишлисты, в которые входит подарок
 }

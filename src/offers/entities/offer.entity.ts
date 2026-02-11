@@ -6,6 +6,7 @@ import {
   UpdateDateColumn,
   Column,
   ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 
 import { User } from '@/users/entities/user.entity';
@@ -39,6 +40,7 @@ export class Offer {
       return user.offers;
     },
   )
+  @JoinColumn({ name: 'user_id' })
   user: User; // содержит id желающего скинуться;
 
   @ManyToOne(
@@ -49,5 +51,6 @@ export class Offer {
       return wish.offers;
     },
   )
+  @JoinColumn({ name: 'item_id' })
   item: Wish; // содержит ссылку на товар;
 }

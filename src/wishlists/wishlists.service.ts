@@ -59,7 +59,12 @@ export class WishlistsService {
     filter: FindOptionsWhere<Wishlist>,
     updateWishlistDto: UpdateWishlistDto,
   ) {
-    return this.wishListRepository.update(filter, updateWishlistDto);
+    const { itemsId: _itemsId, owner: _owner, ...columns } =
+      updateWishlistDto as UpdateWishlistDto & {
+        itemsId?: number[];
+        owner?: unknown;
+      };
+    return this.wishListRepository.update(filter, columns);
   }
 
   public async removeWishlistEntity(filter: FindOptionsWhere<Wishlist>) {
@@ -75,12 +80,14 @@ export class WishlistsService {
       return;
     }
 
-    await this.wishRepository.update(
-      {
+    const wishes = await this.wishRepository.find({
+      where: {
         id: In(itemsId),
         owner: { id: ownerId },
       },
-      { wishlist },
-    );
+    });
+
+    wishlist.items = [...(wishlist.items ?? []), ...wishes];
+    await this.wishListRepository.save(wishlist);
   }
 }

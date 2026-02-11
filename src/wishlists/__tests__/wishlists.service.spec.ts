@@ -39,6 +39,7 @@ describe('WishlistsService', () => {
     };
 
     const mockWishRepository = {
+      find: jest.fn(),
       update: jest.fn(),
     };
 
@@ -119,13 +120,29 @@ describe('WishlistsService', () => {
       const wishlist = service.createWishlistEntity(dto);
       const savedWishlist = { ...wishlist };
 
+      const wishes = [
+        { id: 10, name: 'Wish 1' },
+        { id: 20, name: 'Wish 2' },
+      ];
+
+      wishRepository.find.mockResolvedValue(wishes as unknown as Wish[]);
+      (repository.save as jest.Mock).mockResolvedValue({
+        ...savedWishlist,
+        items: wishes,
+      });
+
       await service.linkItemsToWishlist(savedWishlist, [10, 20], 1);
 
-      expect(wishRepository.update).toHaveBeenCalledWith(
-        expect.objectContaining({
+      expect(wishRepository.find).toHaveBeenCalledWith({
+        where: {
+          id: expect.any(Number) as number,
           owner: { id: 1 },
+        },
+      });
+      expect(repository.save).toHaveBeenCalledWith(
+        expect.objectContaining({
+          items: wishes,
         }),
-        { wishlist: savedWishlist },
       );
     });
   });

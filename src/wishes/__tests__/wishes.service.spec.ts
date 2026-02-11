@@ -28,7 +28,7 @@ describe('WishesService', () => {
     updatedAt: new Date(),
     owner: {} as never,
     offers: [],
-    wishlist: {} as never,
+    wishlists: [],
   };
 
   beforeEach(async () => {
