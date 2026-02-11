@@ -31,10 +31,10 @@ export class UsersController {
   public constructor(private readonly userPresenter: UsersPresenter) {}
 
   @Post('find')
-  @HttpCode(HttpStatus.CREATED)
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Search users by query' })
   @ApiResponse({
-    status: 201,
+    status: 200,
     description: 'List of found users',
     type: [UserPublicProfileResponseDto],
   })

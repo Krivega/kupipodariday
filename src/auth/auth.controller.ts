@@ -27,11 +27,11 @@ export class AuthController {
   public constructor(private readonly authService: AuthService) {}
 
   @Post('signin')
-  @HttpCode(HttpStatus.CREATED)
+  @HttpCode(HttpStatus.OK)
   @UseGuards(AuthLocalGuard)
   @ApiOperation({ summary: 'Sign in' })
   @ApiResponse({
-    status: 201,
+    status: 200,
     description: 'JWT access token',
     type: SigninUserResponseDto,
   })
