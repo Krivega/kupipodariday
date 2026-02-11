@@ -115,7 +115,7 @@ export class OffersPresenter {
       updatedAt: offer.updatedAt,
       amount: offer.amount,
       hidden: offer.hidden,
-      item: offer.item,
+      item: this.wishPresenter.buildWishPartialView(offer.item),
       user: this.userPresenter.toProfile(offer.user),
     };
   }

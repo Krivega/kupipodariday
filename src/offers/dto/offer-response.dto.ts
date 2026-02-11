@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 import { UserProfileResponseDto } from '@/users/dto/user-profile-response.dto';
-import { WishResponseDto } from '@/wishes/dto/wish-response.dto';
+import { WishPartialDto } from '@/wishes/dto/wish-partial.dto';
 
 export class OfferResponseDto {
   @ApiProperty({ example: 1 })
@@ -20,12 +20,12 @@ export class OfferResponseDto {
   hidden!: boolean;
 
   @ApiProperty({
-    description: 'Wish item',
+    description: 'Wish item (partial, without owner/offers)',
     type: () => {
-      return WishResponseDto;
+      return WishPartialDto;
     },
   })
-  item!: WishResponseDto;
+  item!: WishPartialDto;
 
   @ApiProperty({
     type: () => {
