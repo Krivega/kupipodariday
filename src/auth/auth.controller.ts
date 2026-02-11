@@ -37,7 +37,7 @@ export class AuthController {
   })
   @ApiResponse({
     status: 401,
-    description: 'Некорректная пара логин и пароль',
+    description: 'Invalid username or password',
   })
   public async login(
     @Body() _signinUserDto: SigninUserDto,
@@ -67,7 +67,7 @@ export class AuthController {
   })
   @ApiResponse({
     status: 409,
-    description: 'Пользователь с таким email или username уже зарегистрирован',
+    description: 'User with this email or username is already registered',
   })
   public async signup(
     @Body() createUserDto: CreateUserDto,
