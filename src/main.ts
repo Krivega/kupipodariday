@@ -4,6 +4,7 @@ import '@/load-env';
 
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { ConfigService } from '@nestjs/config';
 
 import { AppModule } from '@/app.module';
 import { generateSwagger } from './generateSwagger';
@@ -21,7 +22,8 @@ async function bootstrap() {
     origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
     credentials: true,
   });
-  await app.listen(process.env.PORT ?? 3000);
+  const configService = app.get(ConfigService);
+  await app.listen(configService.get('port') ?? 3000);
 }
 
 // eslint-disable-next-line no-console
