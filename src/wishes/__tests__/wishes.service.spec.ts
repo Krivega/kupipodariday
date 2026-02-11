@@ -77,7 +77,7 @@ describe('WishesService', () => {
       (repository.create as jest.Mock).mockReturnValue(mockWish);
       (repository.save as jest.Mock).mockResolvedValue(mockWish);
 
-      const result = await service.createWish(dto);
+      const result = await service.createAndSaveWishEntity(dto);
 
       expect(repository.create).toHaveBeenCalledWith(dto);
       expect(repository.save).toHaveBeenCalledWith(mockWish);

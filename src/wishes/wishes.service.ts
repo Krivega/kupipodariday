@@ -73,7 +73,7 @@ export class WishesService {
     await repository.increment({ id: wishId }, 'raised', roundedAmount);
   }
 
-  public async createWish(
+  public async createAndSaveWishEntity(
     createWishDto: CreateWishDto & { owner: UserIdRef },
   ): Promise<Wish> {
     const wish = this.createWishEntity(createWishDto);

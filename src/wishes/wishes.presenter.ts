@@ -95,7 +95,7 @@ export class WishesPresenter {
   public async create(
     createWishDto: CreateWishDto & { owner: { id: number } },
   ): Promise<WishResponseDto> {
-    const wish = await this.wishesService.createWish({
+    const wish = await this.wishesService.createAndSaveWishEntity({
       ...createWishDto,
       owner: createWishDto.owner,
     });
@@ -182,7 +182,7 @@ export class WishesPresenter {
       { copied: wish.copied + 1 },
     );
 
-    const newWish = await this.wishesService.createWish({
+    const newWish = await this.wishesService.createAndSaveWishEntity({
       name: wish.name,
       link: wish.link,
       image: wish.image,
