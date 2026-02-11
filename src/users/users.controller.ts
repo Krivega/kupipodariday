@@ -44,7 +44,7 @@ export class UsersController {
   public async findOwn(
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<UserProfileResponseDto> {
-    const own = await this.usersService.findOne({ id: user.id });
+    const own = await this.usersService.findOneUserEntity({ id: user.id });
 
     if (!own) {
       throw userNotFoundException;
@@ -68,7 +68,7 @@ export class UsersController {
   public async getOwnWishes(
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<UserWishesDto[]> {
-    const own = await this.usersService.findOne(
+    const own = await this.usersService.findOneUserEntity(
       { id: user.id },
       { relations: ['wishes'] },
     );
@@ -84,7 +84,7 @@ export class UsersController {
   public async getWishes(
     @Param('username') username: string,
   ): Promise<UserWishesDto[]> {
-    const user = await this.usersService.findOne(
+    const user = await this.usersService.findOneUserEntity(
       { username },
       { relations: ['wishes'] },
     );
@@ -100,7 +100,7 @@ export class UsersController {
   public async findOne(
     @Param('username') username: string,
   ): Promise<UserPublicProfileResponseDto> {
-    const user = await this.usersService.findOne({ username });
+    const user = await this.usersService.findOneUserEntity({ username });
 
     if (!user) {
       throw userNotFoundException;

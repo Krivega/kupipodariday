@@ -12,9 +12,9 @@ describe('WishlistsController', () => {
     const mockWishlistsService = {
       create: jest.fn(),
       findMany: jest.fn(),
-      findOne: jest.fn(),
-      update: jest.fn(),
-      remove: jest.fn(),
+      findOneWishlistEntity: jest.fn(),
+      updateWishlistEntity: jest.fn(),
+      removeWishlistEntity: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({

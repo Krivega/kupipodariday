@@ -15,31 +15,83 @@ export class UsersService {
     private readonly usersRepository: Repository<User>,
   ) {}
 
+  // ——— Pure CRUD ———
+
+  public createUserEntity(
+    userData: CreateUserDto & { password: string },
+  ): User {
+    return this.usersRepository.create(userData);
+  }
+
+  public async findOneUserEntity(
+    filter: FindOptionsWhere<User>,
+    options?: Omit<FindManyOptions<User>, 'where'>,
+  ): Promise<User | null> {
+    return this.usersRepository.findOne({
+      ...options,
+      where: filter,
+    });
+  }
+
+  public async findManyUserEntity(
+    filter?: FindOptionsWhere<User> | FindOptionsWhere<User>[],
+    options?: Omit<FindManyOptions<User>, 'where'>,
+  ): Promise<User[]> {
+    return this.usersRepository.find({
+      ...options,
+      where: filter,
+    });
+  }
+
+  public async saveUserEntity(user: User): Promise<User> {
+    return this.usersRepository.save(user);
+  }
+
+  public async updateUserEntity(
+    filter: FindOptionsWhere<User>,
+    data: Partial<User>,
+  ) {
+    return this.usersRepository.update(filter, data);
+  }
+
+  public async hasExistsUserEntity(
+    filter: FindOptionsWhere<User> | FindOptionsWhere<User>[],
+  ): Promise<boolean> {
+    return this.usersRepository.exists({ where: filter });
+  }
+
+  /** Увеличивает tokenVersion пользователя — инвалидирует все выданные ему JWT */
+  public async incrementTokenVersionUserEntity(userId: number): Promise<void> {
+    await this.usersRepository.increment({ id: userId }, 'tokenVersion', 1);
+  }
+
+  // ——— Business logic & data processing ———
+
   public async create(createUserDto: CreateUserDto): Promise<User> {
     const hashedPassword = await hashPassword(createUserDto.password);
-    const user = this.usersRepository.create({
+    const user = this.createUserEntity({
       ...createUserDto,
       password: hashedPassword,
     });
 
-    return this.usersRepository.save(user);
+    return this.saveUserEntity(user);
   }
 
   public async update(
     filter: FindOptionsWhere<User>,
     updateUserDto: UpdateUserDto,
   ): Promise<User> {
-    let data = updateUserDto;
+    const data =
+      updateUserDto.password === undefined
+        ? updateUserDto
+        : {
+            ...updateUserDto,
+            password: await hashPassword(updateUserDto.password),
+          };
 
-    if (updateUserDto.password !== undefined) {
-      const hashedPassword = await hashPassword(updateUserDto.password);
+    await this.updateUserEntity(filter, data);
 
-      data = { ...updateUserDto, password: hashedPassword };
-    }
-
-    await this.usersRepository.update(filter, data);
-
-    const user = await this.findOne(filter);
+    const user = await this.findOneUserEntity(filter);
 
     if (!user) {
       throw userNotFoundException;
@@ -55,7 +107,7 @@ export class UsersService {
     username: string;
     password: string;
   }): Promise<User | undefined> {
-    const user = await this.findOne({ username });
+    const user = await this.findOneUserEntity({ username });
 
     if (!user) {
       return undefined;
@@ -66,48 +118,17 @@ export class UsersService {
     return isPasswordValid ? user : undefined;
   }
 
-  public async findOne(
-    filter: FindOptionsWhere<User>,
-    options?: Omit<FindManyOptions<User>, 'where'>,
-  ): Promise<User | null> {
-    return this.usersRepository.findOne({
-      ...options,
-      where: filter,
-    });
-  }
-
-  public async hasExists(
-    filter: FindOptionsWhere<User> | FindOptionsWhere<User>[],
-  ): Promise<boolean> {
-    return this.usersRepository.exists({ where: filter });
-  }
-
-  public async findMany(
-    filter?: FindOptionsWhere<User> | FindOptionsWhere<User>[],
-    options?: Omit<FindManyOptions<User>, 'where'>,
-  ): Promise<User[]> {
-    return this.usersRepository.find({
-      ...options,
-      where: filter,
-    });
-  }
-
   public async searchByQuery(query: string): Promise<User[]> {
     if (!query) {
-      return this.findMany();
+      return this.findManyUserEntity();
     }
 
     const likeQuery = `%${query}%`;
 
-    return this.findMany([
+    return this.findManyUserEntity([
       { username: ILike(likeQuery) },
       { email: ILike(likeQuery) },
       { about: ILike(likeQuery) },
     ]);
-  }
-
-  /** Увеличивает tokenVersion пользователя — инвалидирует все выданные ему JWT */
-  public async incrementTokenVersion(userId: number): Promise<void> {
-    await this.usersRepository.increment({ id: userId }, 'tokenVersion', 1);
   }
 }

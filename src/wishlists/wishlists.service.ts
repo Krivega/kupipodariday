@@ -22,39 +22,20 @@ export class WishlistsService {
     private readonly wishesService: WishesService,
   ) {}
 
-  public async create(createWishlistDto: CreateWishlistDto & { owner: User }) {
+  public createWishlistEntity(
+    createWishlistDto: CreateWishlistDto & { owner: User },
+  ): Wishlist {
     const { itemsId, owner, ...wishlistData } = createWishlistDto;
-    const wishlist = this.wishListRepository.create({
+
+    return this.wishListRepository.create({
       ...wishlistData,
       owner,
     });
-    const savedWishlist = await this.wishListRepository.save(wishlist);
-
-    const idList = itemsId ?? [];
-
-    if (idList.length > 0) {
-      await this.wishRepository.update(
-        {
-          id: In(idList),
-          owner: { id: owner.id },
-        },
-        { wishlist: savedWishlist },
-      );
-    }
-
-    const result = await this.wishListRepository.findOne({
-      where: { id: savedWishlist.id },
-      relations: ['owner', 'items', 'items.owner', 'items.offers'],
-    });
-
-    if (!result) {
-      throw wishlistNotFoundException;
-    }
-
-    return this.buildWishlistViewForUser(result, owner.id);
   }
 
-  public async findOne(
+  // ——— Pure CRUD ———
+
+  public async findOneWishlistEntity(
     filter: FindOptionsWhere<Wishlist>,
     options?: Omit<FindManyOptions<Wishlist>, 'where'>,
   ): Promise<Wishlist | null> {
@@ -64,26 +45,67 @@ export class WishlistsService {
     });
   }
 
+  public async findManyWishlistEntity(
+    filter?: FindOptionsWhere<Wishlist>,
+    options?: Omit<FindManyOptions<Wishlist>, 'where'>,
+  ): Promise<Wishlist[]> {
+    return this.wishListRepository.find({
+      ...options,
+      where: filter,
+    });
+  }
+
+  public async saveWishlistEntity(wishlist: Wishlist): Promise<Wishlist> {
+    return this.wishListRepository.save(wishlist);
+  }
+
+  public async updateWishlistEntity(
+    filter: FindOptionsWhere<Wishlist>,
+    updateWishlistDto: UpdateWishlistDto,
+  ) {
+    return this.wishListRepository.update(filter, updateWishlistDto);
+  }
+
+  public async removeWishlistEntity(filter: FindOptionsWhere<Wishlist>) {
+    return this.wishListRepository.delete(filter);
+  }
+
+  // ——— Business logic & data processing ———
+
+  public async create(createWishlistDto: CreateWishlistDto & { owner: User }) {
+    const wishlist = this.createWishlistEntity(createWishlistDto);
+    const savedWishlist = await this.saveWishlistEntity(wishlist);
+
+    await this.linkItemsToWishlist(
+      savedWishlist,
+      createWishlistDto.itemsId ?? [],
+      createWishlistDto.owner.id,
+    );
+
+    const result = await this.findOneWishlistEntity(
+      { id: savedWishlist.id },
+      {
+        relations: ['owner', 'items', 'items.owner', 'items.offers'],
+      },
+    );
+
+    if (!result) {
+      throw wishlistNotFoundException;
+    }
+
+    return this.buildWishlistViewForUser(result, createWishlistDto.owner.id);
+  }
+
   public async findMany(
     currentUserId: number,
     filter?: FindOptionsWhere<Wishlist>,
     options?: Omit<FindManyOptions<Wishlist>, 'where'>,
   ) {
-    const wishlists = await this.wishListRepository.find({
-      ...options,
-      where: filter,
-    });
+    const wishlists = await this.findManyWishlistEntity(filter, options);
 
     return wishlists.map((wishlist) => {
       return this.buildWishlistViewForUser(wishlist, currentUserId);
     });
-  }
-
-  public async update(
-    filter: FindOptionsWhere<Wishlist>,
-    updateWishlistDto: UpdateWishlistDto,
-  ) {
-    return this.wishListRepository.update(filter, updateWishlistDto);
   }
 
   public buildWishlistViewForUser(wishlist: Wishlist, currentUserId: number) {
@@ -96,7 +118,23 @@ export class WishlistsService {
     };
   }
 
-  public async remove(filter: FindOptionsWhere<Wishlist>) {
-    return this.wishListRepository.delete(filter);
+  // ——— Private helpers ———
+
+  private async linkItemsToWishlist(
+    wishlist: Wishlist,
+    itemsId: number[],
+    ownerId: number,
+  ): Promise<void> {
+    if (itemsId.length === 0) {
+      return;
+    }
+
+    await this.wishRepository.update(
+      {
+        id: In(itemsId),
+        owner: { id: ownerId },
+      },
+      { wishlist },
+    );
   }
 }

@@ -30,7 +30,7 @@ export class WishesController {
 
   @Get('last')
   public async getLast(@CurrentUser() user: AuthenticatedUser) {
-    const allWishes = await this.wishesService.findMany(
+    const allWishes = await this.wishesService.findManyWishEntity(
       {},
       {
         relations: ['owner'],
@@ -48,7 +48,7 @@ export class WishesController {
 
   @Get('top')
   public async getTop(@CurrentUser() user: AuthenticatedUser) {
-    const allWishes = await this.wishesService.findMany(
+    const allWishes = await this.wishesService.findManyWishEntity(
       {},
       {
         relations: ['owner'],
@@ -69,7 +69,7 @@ export class WishesController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
   ) {
-    const wish = await this.wishesService.findOne(
+    const wish = await this.wishesService.findOneWishEntity(
       { id: Number(id) },
       { relations: ['owner', 'offers', 'offers.user'] },
     );
@@ -87,7 +87,7 @@ export class WishesController {
     @Param('id') id: string,
     @Body() updateWishDto: UpdateWishDto,
   ) {
-    const wish = await this.wishesService.findOne(
+    const wish = await this.wishesService.findOneWishEntity(
       { id: Number(id) },
       { relations: ['owner'] },
     );
@@ -106,7 +106,10 @@ export class WishesController {
       throw wishChangePriceForbiddenException;
     }
 
-    return this.wishesService.update({ id: Number(id) }, updateWishDto);
+    return this.wishesService.updateWishEntity(
+      { id: Number(id) },
+      updateWishDto,
+    );
   }
 
   @Delete(':id')
@@ -114,7 +117,7 @@ export class WishesController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
   ) {
-    const wish = await this.wishesService.findOne(
+    const wish = await this.wishesService.findOneWishEntity(
       { id: Number(id) },
       { relations: ['owner'] },
     );
@@ -133,7 +136,7 @@ export class WishesController {
       throw wishChangePriceForbiddenException;
     }
 
-    return this.wishesService.remove({ id: Number(id) });
+    return this.wishesService.removeWishEntity({ id: Number(id) });
   }
 
   @Post(':id/copy')

@@ -111,13 +111,13 @@ describe('UsersService', () => {
     });
   });
 
-  describe('findOne', () => {
+  describe('findOneUserEntity', () => {
     it('should return a user when found', async () => {
       const filter = { id: 1 };
 
       (repository.findOne as jest.Mock).mockResolvedValue(mockUser);
 
-      const result = await service.findOne(filter);
+      const result = await service.findOneUserEntity(filter);
 
       expect(repository.findOne).toHaveBeenCalledWith({
         where: filter,
@@ -130,7 +130,7 @@ describe('UsersService', () => {
 
       (repository.findOne as jest.Mock).mockResolvedValue(null);
 
-      const result = await service.findOne(filter);
+      const result = await service.findOneUserEntity(filter);
 
       expect(repository.findOne).toHaveBeenCalledWith({
         where: filter,
@@ -144,7 +144,7 @@ describe('UsersService', () => {
 
       (repository.findOne as jest.Mock).mockResolvedValue(mockUser);
 
-      await service.findOne(filter, options);
+      await service.findOneUserEntity(filter, options);
 
       expect(repository.findOne).toHaveBeenCalledWith({
         where: filter,
@@ -153,13 +153,13 @@ describe('UsersService', () => {
     });
   });
 
-  describe('hasExists', () => {
+  describe('hasExistsUserEntity', () => {
     it('should return true when entity exists', async () => {
       const filter = { id: 1 };
 
       (repository.exists as jest.Mock).mockResolvedValue(true);
 
-      const result = await service.hasExists(filter);
+      const result = await service.hasExistsUserEntity(filter);
 
       expect(repository.exists).toHaveBeenCalledWith({ where: filter });
       expect(result).toBe(true);
@@ -170,7 +170,7 @@ describe('UsersService', () => {
 
       (repository.exists as jest.Mock).mockResolvedValue(false);
 
-      const result = await service.hasExists(filter);
+      const result = await service.hasExistsUserEntity(filter);
 
       expect(repository.exists).toHaveBeenCalledWith({ where: filter });
       expect(result).toBe(false);
@@ -181,21 +181,21 @@ describe('UsersService', () => {
 
       (repository.exists as jest.Mock).mockResolvedValue(true);
 
-      const result = await service.hasExists(filter);
+      const result = await service.hasExistsUserEntity(filter);
 
       expect(repository.exists).toHaveBeenCalledWith({ where: filter });
       expect(result).toBe(true);
     });
   });
 
-  describe('findMany', () => {
+  describe('findManyUserEntity', () => {
     it('should return an array of users', async () => {
       const filter = { username: 'johndoe' };
       const users = [mockUser];
 
       (repository.find as jest.Mock).mockResolvedValue(users);
 
-      const result = await service.findMany(filter);
+      const result = await service.findManyUserEntity(filter);
 
       expect(repository.find).toHaveBeenCalledWith({
         where: filter,
@@ -208,7 +208,7 @@ describe('UsersService', () => {
 
       (repository.find as jest.Mock).mockResolvedValue([]);
 
-      const result = await service.findMany(filter);
+      const result = await service.findManyUserEntity(filter);
 
       expect(repository.find).toHaveBeenCalledWith({
         where: filter,
@@ -222,7 +222,7 @@ describe('UsersService', () => {
 
       (repository.find as jest.Mock).mockResolvedValue([]);
 
-      await service.findMany(filter, options);
+      await service.findManyUserEntity(filter, options);
 
       expect(repository.find).toHaveBeenCalledWith({
         where: filter,

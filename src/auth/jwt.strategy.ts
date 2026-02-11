@@ -27,7 +27,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
    * Проверка tokenVersion инвалидирует токены после выхода (signout).
    */
   public async validate(jwtPayload: { sub: number; tokenVersion?: number }) {
-    const user = await this.usersService.findOne({ id: jwtPayload.sub });
+    const user = await this.usersService.findOneUserEntity({
+      id: jwtPayload.sub,
+    });
 
     if (user === null) {
       throw unauthorizedException;

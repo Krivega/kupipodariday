@@ -45,35 +45,9 @@ export class OffersService {
     private readonly wishesService: WishesService,
   ) {}
 
-  public async create(
-    createOfferDto: CreateOfferDto & { user: { id: number } },
-  ): Promise<Offer> {
-    const wish = await this.wishesService.findOne(
-      { id: createOfferDto.itemId },
-      { relations: ['owner', 'offers', 'offers.user'] },
-    );
+  // ——— Pure CRUD ———
 
-    if (!wish) {
-      throw wishNotFoundException;
-    }
-
-    this.ensureUserCanContributeToWish({
-      wish,
-      amount: createOfferDto.amount,
-      user: createOfferDto.user,
-    });
-
-    const offer = this.offersRepository.create({
-      amount: createOfferDto.amount,
-      hidden: createOfferDto.hidden ?? false,
-      item: { id: wish.id },
-      user: { id: createOfferDto.user.id },
-    });
-
-    return this.offersRepository.save(offer);
-  }
-
-  public async findOne(
+  public async findOneOfferEntity(
     filter: FindOptionsWhere<Offer>,
     options?: Omit<FindManyOptions<Offer>, 'where'>,
   ): Promise<Offer | null> {
@@ -83,7 +57,7 @@ export class OffersService {
     });
   }
 
-  public async findMany(
+  public async findManyOfferEntity(
     filter?: FindOptionsWhere<Offer>,
     options?: Omit<FindManyOptions<Offer>, 'where'>,
   ): Promise<Offer[]> {
@@ -91,6 +65,64 @@ export class OffersService {
       ...options,
       where: filter,
     });
+  }
+
+  public createOfferEntity(
+    createOfferDto: CreateOfferDto & { user: { id: number } },
+    wish: Wish,
+  ): Offer {
+    return this.offersRepository.create({
+      amount: createOfferDto.amount,
+      hidden: createOfferDto.hidden ?? false,
+      item: { id: wish.id },
+      user: { id: createOfferDto.user.id },
+    });
+  }
+
+  public async saveOfferEntity(offer: Offer): Promise<Offer> {
+    return this.offersRepository.save(offer);
+  }
+
+  // ——— Business logic & data processing ———
+
+  public async create(
+    createOfferDto: CreateOfferDto & { user: { id: number } },
+  ): Promise<Offer> {
+    const wish = await this.validateCreateOffer(createOfferDto);
+    const offer = this.createOfferEntity(createOfferDto, wish);
+
+    return this.saveOfferEntity(offer);
+  }
+
+  /**
+   * Список заявок для текущего пользователя: для чужих заявок с hidden=true
+   */
+  public async findManyForUser(currentUserId: number): Promise<OfferView[]> {
+    const offers = await this.findManyOfferEntity(undefined, {
+      relations: ['user', 'item'],
+      order: { createdAt: 'DESC' },
+    });
+
+    return this.buildOffersViewForUser(offers, currentUserId);
+  }
+
+  /**
+   * Один заявка по id с учётом hidden для текущего пользователя.
+   */
+  public async findOneForUser(
+    id: number,
+    currentUserId: number,
+  ): Promise<OfferView | undefined> {
+    const offer = await this.offersRepository.findOne({
+      where: { id },
+      relations: ['user', 'item'],
+    });
+
+    if (!offer || !hasVisibleOffer(offer, currentUserId)) {
+      return undefined;
+    }
+
+    return offer;
   }
 
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
@@ -128,35 +160,27 @@ export class OffersService {
     );
   }
 
-  /**
-   * Список заявок для текущего пользователя: для чужих заявок с hidden=true
-   */
-  public async findManyForUser(currentUserId: number): Promise<OfferView[]> {
-    const offers = await this.offersRepository.find({
-      relations: ['user', 'item'],
-      order: { createdAt: 'DESC' },
-    });
+  // ——— Private helpers ———
 
-    return this.buildOffersViewForUser(offers, currentUserId);
-  }
+  private async validateCreateOffer(
+    createOfferDto: CreateOfferDto & { user: { id: number } },
+  ): Promise<Wish> {
+    const wish = await this.wishesService.findOneWishEntity(
+      { id: createOfferDto.itemId },
+      { relations: ['owner', 'offers', 'offers.user'] },
+    );
 
-  /**
-   * Один заявка по id с учётом hidden для текущего пользователя.
-   */
-  public async findOneForUser(
-    id: number,
-    currentUserId: number,
-  ): Promise<OfferView | undefined> {
-    const offer = await this.offersRepository.findOne({
-      where: { id },
-      relations: ['user', 'item'],
-    });
-
-    if (!offer || !hasVisibleOffer(offer, currentUserId)) {
-      return undefined;
+    if (!wish) {
+      throw wishNotFoundException;
     }
 
-    return offer;
+    this.ensureUserCanContributeToWish({
+      wish,
+      amount: createOfferDto.amount,
+      user: createOfferDto.user,
+    });
+
+    return wish;
   }
 
   private ensureUserCanContributeToWish({

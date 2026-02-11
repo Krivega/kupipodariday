@@ -11,10 +11,9 @@ describe('UsersController', () => {
   beforeEach(async () => {
     const mockUsersService = {
       create: jest.fn(),
-      findMany: jest.fn(),
-      findOne: jest.fn(),
+      searchByQuery: jest.fn(),
+      findOneUserEntity: jest.fn(),
       update: jest.fn(),
-      remove: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({

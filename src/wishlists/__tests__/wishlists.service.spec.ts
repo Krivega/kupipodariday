@@ -3,6 +3,7 @@ import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 
 import { Wish } from '@/wishes/entities/wish.entity';
+import { WishesService } from '@/wishes/wishes.service';
 import { Wishlist } from '../entities/wishlist.entity';
 import { WishlistsService } from '../wishlists.service';
 
@@ -42,6 +43,12 @@ describe('WishlistsService', () => {
       update: jest.fn(),
     };
 
+    const mockWishesService = {
+      buildWishViewForUser: jest.fn((item: Wish) => {
+        return item;
+      }),
+    } as unknown as jest.Mocked<WishesService>;
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         WishlistsService,
@@ -52,6 +59,10 @@ describe('WishlistsService', () => {
         {
           provide: getRepositoryToken(Wish),
           useValue: mockWishRepository,
+        },
+        {
+          provide: WishesService,
+          useValue: mockWishesService,
         },
       ],
     }).compile();
@@ -95,9 +106,13 @@ describe('WishlistsService', () => {
       expect(repository.save).toHaveBeenCalledWith(mockWishlist);
       expect(repository.findOne).toHaveBeenCalledWith({
         where: { id: mockWishlist.id },
-        relations: ['owner', 'items'],
+        relations: ['owner', 'items', 'items.owner', 'items.offers'],
       });
-      expect(result).toEqual(mockWishlist);
+      expect(result).toMatchObject({
+        id: mockWishlist.id,
+        name: mockWishlist.name,
+        items: [],
+      });
     });
 
     it('should create wishlist and link existing wishes by itemsId', async () => {
@@ -133,13 +148,13 @@ describe('WishlistsService', () => {
     });
   });
 
-  describe('findOne', () => {
+  describe('findOneWishlistEntity', () => {
     it('should return a wishlist when found', async () => {
       const filter = { id: 1 };
 
       (repository.findOne as jest.Mock).mockResolvedValue(mockWishlist);
 
-      const result = await service.findOne(filter);
+      const result = await service.findOneWishlistEntity(filter);
 
       expect(repository.findOne).toHaveBeenCalledWith({
         where: filter,
@@ -152,7 +167,7 @@ describe('WishlistsService', () => {
 
       (repository.findOne as jest.Mock).mockResolvedValue(null);
 
-      const result = await service.findOne(filter);
+      const result = await service.findOneWishlistEntity(filter);
 
       expect(repository.findOne).toHaveBeenCalledWith({
         where: filter,
@@ -160,13 +175,13 @@ describe('WishlistsService', () => {
       expect(result).toBeNull();
     });
 
-    it('should pass options to findOne', async () => {
+    it('should pass options to findOneWishlistEntity', async () => {
       const filter = { id: 1 };
       const options = { select: ['id', 'name'] as (keyof Wishlist)[] };
 
       (repository.findOne as jest.Mock).mockResolvedValue(mockWishlist);
 
-      await service.findOne(filter, options);
+      await service.findOneWishlistEntity(filter, options);
 
       expect(repository.findOne).toHaveBeenCalledWith({
         where: filter,
@@ -176,26 +191,32 @@ describe('WishlistsService', () => {
   });
 
   describe('findMany', () => {
-    it('should return an array of wishlists', async () => {
+    it('should return an array of wishlists with built view', async () => {
+      const currentUserId = 1;
       const filter = { id: 1 };
       const wishlists = [mockWishlist];
 
       (repository.find as jest.Mock).mockResolvedValue(wishlists);
 
-      const result = await service.findMany(filter);
+      const result = await service.findMany(currentUserId, filter);
 
       expect(repository.find).toHaveBeenCalledWith({
         where: filter,
       });
-      expect(result).toEqual(wishlists);
+      expect(result).toHaveLength(1);
+      expect(result[0]).toMatchObject({
+        id: mockWishlist.id,
+        name: mockWishlist.name,
+      });
     });
 
     it('should return empty array when no wishlists match', async () => {
+      const currentUserId = 1;
       const filter = { id: 999 };
 
       (repository.find as jest.Mock).mockResolvedValue([]);
 
-      const result = await service.findMany(filter);
+      const result = await service.findMany(currentUserId, filter);
 
       expect(repository.find).toHaveBeenCalledWith({
         where: filter,
@@ -204,12 +225,13 @@ describe('WishlistsService', () => {
     });
 
     it('should pass options to find', async () => {
+      const currentUserId = 1;
       const filter = { id: 1 };
       const options = { take: 10, skip: 0 };
 
       (repository.find as jest.Mock).mockResolvedValue([]);
 
-      await service.findMany(filter, options);
+      await service.findMany(currentUserId, filter, options);
 
       expect(repository.find).toHaveBeenCalledWith({
         where: filter,
@@ -219,7 +241,7 @@ describe('WishlistsService', () => {
     });
   });
 
-  describe('update', () => {
+  describe('updateWishlistEntity', () => {
     it('should call repository.update with filter and dto', async () => {
       const filter = { id: 1 };
       const updateDto: UpdateWishlistDto = { name: 'Updated name' };
@@ -227,21 +249,21 @@ describe('WishlistsService', () => {
 
       (repository.update as jest.Mock).mockResolvedValue(updateResult);
 
-      const result = await service.update(filter, updateDto);
+      const result = await service.updateWishlistEntity(filter, updateDto);
 
       expect(repository.update).toHaveBeenCalledWith(filter, updateDto);
       expect(result).toEqual(updateResult);
     });
   });
 
-  describe('remove', () => {
+  describe('removeWishlistEntity', () => {
     it('should call repository.delete with filter', async () => {
       const filter = { id: 1 };
       const deleteResult = { affected: 1, raw: [] };
 
       (repository.delete as jest.Mock).mockResolvedValue(deleteResult);
 
-      const result = await service.remove(filter);
+      const result = await service.removeWishlistEntity(filter);
 
       expect(repository.delete).toHaveBeenCalledWith(filter);
       expect(result).toEqual(deleteResult);

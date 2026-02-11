@@ -36,7 +36,7 @@ describe('OffersService', () => {
     };
 
     const mockWishesService = {
-      findOne: jest.fn(),
+      findOneWishEntity: jest.fn(),
       calculateRaisedFromOffers: jest.fn(),
     } as unknown as jest.Mocked<WishesService>;
 
@@ -83,13 +83,15 @@ describe('OffersService', () => {
         offers: [],
       } as never;
 
-      (wishesService.findOne as jest.Mock).mockResolvedValue(mockWish);
+      (wishesService.findOneWishEntity as jest.Mock).mockResolvedValue(
+        mockWish,
+      );
       (repository.create as jest.Mock).mockReturnValue(mockOffer);
       (repository.save as jest.Mock).mockResolvedValue(mockOffer);
 
       const result = await service.create(dto);
 
-      expect(wishesService.findOne).toHaveBeenCalledWith(
+      expect(wishesService.findOneWishEntity).toHaveBeenCalledWith(
         { id: dto.itemId },
         { relations: ['owner', 'offers', 'offers.user'] },
       );
@@ -106,13 +108,13 @@ describe('OffersService', () => {
     });
   });
 
-  describe('findOne', () => {
+  describe('findOneOfferEntity', () => {
     it('should return an offer when found', async () => {
       const filter = { id: 1 };
 
       (repository.findOne as jest.Mock).mockResolvedValue(mockOffer);
 
-      const result = await service.findOne(filter);
+      const result = await service.findOneOfferEntity(filter);
 
       expect(repository.findOne).toHaveBeenCalledWith({
         where: filter,
@@ -125,7 +127,7 @@ describe('OffersService', () => {
 
       (repository.findOne as jest.Mock).mockResolvedValue(null);
 
-      const result = await service.findOne(filter);
+      const result = await service.findOneOfferEntity(filter);
 
       expect(repository.findOne).toHaveBeenCalledWith({
         where: filter,
@@ -139,7 +141,7 @@ describe('OffersService', () => {
 
       (repository.findOne as jest.Mock).mockResolvedValue(mockOffer);
 
-      await service.findOne(filter, options);
+      await service.findOneOfferEntity(filter, options);
 
       expect(repository.findOne).toHaveBeenCalledWith({
         where: filter,
@@ -148,14 +150,14 @@ describe('OffersService', () => {
     });
   });
 
-  describe('findMany', () => {
+  describe('findManyOfferEntity', () => {
     it('should return an array of offers', async () => {
       const filter = { id: 1 };
       const offers = [mockOffer];
 
       (repository.find as jest.Mock).mockResolvedValue(offers);
 
-      const result = await service.findMany(filter);
+      const result = await service.findManyOfferEntity(filter);
 
       expect(repository.find).toHaveBeenCalledWith({
         where: filter,
@@ -168,7 +170,7 @@ describe('OffersService', () => {
 
       (repository.find as jest.Mock).mockResolvedValue([]);
 
-      const result = await service.findMany(filter);
+      const result = await service.findManyOfferEntity(filter);
 
       expect(repository.find).toHaveBeenCalledWith({
         where: filter,
@@ -182,7 +184,7 @@ describe('OffersService', () => {
 
       (repository.find as jest.Mock).mockResolvedValue([]);
 
-      await service.findMany(filter, options);
+      await service.findManyOfferEntity(filter, options);
 
       expect(repository.find).toHaveBeenCalledWith({
         where: filter,

@@ -23,15 +23,17 @@ export class WishesService {
     private readonly offersService: OffersService,
   ) {}
 
-  public async create(
-    createWishDto: CreateWishDto & { owner: User },
-  ): Promise<Wish> {
-    const wish = this.wishRepository.create(createWishDto);
+  // ——— Pure CRUD ———
 
-    return this.wishRepository.save(wish);
+  // ——— Private helpers ———
+
+  public createWishEntity(
+    createWishDto: CreateWishDto & { owner: User },
+  ): Wish {
+    return this.wishRepository.create(createWishDto);
   }
 
-  public async findOne(
+  public async findOneWishEntity(
     filter: FindOptionsWhere<Wish>,
     options?: Omit<FindManyOptions<Wish>, 'where'>,
   ): Promise<Wish | null> {
@@ -41,7 +43,7 @@ export class WishesService {
     });
   }
 
-  public async findMany(
+  public async findManyWishEntity(
     filter?: FindOptionsWhere<Wish>,
     options?: Omit<FindManyOptions<Wish>, 'where'>,
   ): Promise<Wish[]> {
@@ -51,21 +53,42 @@ export class WishesService {
     });
   }
 
-  public async update(
+  public async saveWishEntity(wish: Wish): Promise<Wish> {
+    return this.wishRepository.save(wish);
+  }
+
+  public async updateWishEntity(
     filter: FindOptionsWhere<Wish>,
     updateWishDto: UpdateWishDto & { copied?: number },
   ) {
     return this.wishRepository.update(filter, updateWishDto);
   }
 
+  public async removeWishEntity(filter: FindOptionsWhere<Wish>) {
+    return this.wishRepository.delete(filter);
+  }
+
+  // ——— Business logic & data processing ———
+
+  public async create(
+    createWishDto: CreateWishDto & { owner: User },
+  ): Promise<Wish> {
+    const wish = this.createWishEntity(createWishDto);
+
+    return this.saveWishEntity(wish);
+  }
+
   public async copy({ id, userId }: { id: number; userId: number }) {
-    const wish = await this.findOne({ id: Number(id) });
+    const wish = await this.findOneWishEntity({ id: Number(id) });
 
     if (!wish) {
       return undefined;
     }
 
-    await this.update({ id: Number(id) }, { copied: wish.copied + 1 });
+    await this.updateWishEntity(
+      { id: Number(id) },
+      { copied: wish.copied + 1 },
+    );
 
     return this.create({
       name: wish.name,
@@ -75,10 +98,6 @@ export class WishesService {
       description: wish.description,
       owner: { id: userId } as User,
     });
-  }
-
-  public async remove(filter: FindOptionsWhere<Wish>) {
-    return this.wishRepository.delete(filter);
   }
 
   /**

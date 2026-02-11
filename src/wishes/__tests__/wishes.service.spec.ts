@@ -98,13 +98,13 @@ describe('WishesService', () => {
     });
   });
 
-  describe('findOne', () => {
+  describe('findOneWishEntity', () => {
     it('should return a wish when found', async () => {
       const filter = { id: 1 };
 
       (repository.findOne as jest.Mock).mockResolvedValue(mockWish);
 
-      const result = await service.findOne(filter);
+      const result = await service.findOneWishEntity(filter);
 
       expect(repository.findOne).toHaveBeenCalledWith({
         where: filter,
@@ -117,7 +117,7 @@ describe('WishesService', () => {
 
       (repository.findOne as jest.Mock).mockResolvedValue(null);
 
-      const result = await service.findOne(filter);
+      const result = await service.findOneWishEntity(filter);
 
       expect(repository.findOne).toHaveBeenCalledWith({
         where: filter,
@@ -131,7 +131,7 @@ describe('WishesService', () => {
 
       (repository.findOne as jest.Mock).mockResolvedValue(mockWish);
 
-      await service.findOne(filter, options);
+      await service.findOneWishEntity(filter, options);
 
       expect(repository.findOne).toHaveBeenCalledWith({
         where: filter,
@@ -140,14 +140,14 @@ describe('WishesService', () => {
     });
   });
 
-  describe('findMany', () => {
+  describe('findManyWishEntity', () => {
     it('should return an array of wishes', async () => {
       const filter = { id: 1 };
       const wishes = [mockWish];
 
       (repository.find as jest.Mock).mockResolvedValue(wishes);
 
-      const result = await service.findMany(filter);
+      const result = await service.findManyWishEntity(filter);
 
       expect(repository.find).toHaveBeenCalledWith({
         where: filter,
@@ -160,7 +160,7 @@ describe('WishesService', () => {
 
       (repository.find as jest.Mock).mockResolvedValue([]);
 
-      const result = await service.findMany(filter);
+      const result = await service.findManyWishEntity(filter);
 
       expect(repository.find).toHaveBeenCalledWith({
         where: filter,
@@ -174,7 +174,7 @@ describe('WishesService', () => {
 
       (repository.find as jest.Mock).mockResolvedValue([]);
 
-      await service.findMany(filter, options);
+      await service.findManyWishEntity(filter, options);
 
       expect(repository.find).toHaveBeenCalledWith({
         where: filter,
@@ -184,7 +184,7 @@ describe('WishesService', () => {
     });
   });
 
-  describe('update', () => {
+  describe('updateWishEntity', () => {
     it('should call repository.update with filter and dto', async () => {
       const filter = { id: 1 };
       const updateDto: UpdateWishDto = { name: 'Updated name' };
@@ -192,21 +192,21 @@ describe('WishesService', () => {
 
       (repository.update as jest.Mock).mockResolvedValue(updateResult);
 
-      const result = await service.update(filter, updateDto);
+      const result = await service.updateWishEntity(filter, updateDto);
 
       expect(repository.update).toHaveBeenCalledWith(filter, updateDto);
       expect(result).toEqual(updateResult);
     });
   });
 
-  describe('remove', () => {
+  describe('removeWishEntity', () => {
     it('should call repository.delete with filter', async () => {
       const filter = { id: 1 };
       const deleteResult = { affected: 1, raw: [] };
 
       (repository.delete as jest.Mock).mockResolvedValue(deleteResult);
 
-      const result = await service.remove(filter);
+      const result = await service.removeWishEntity(filter);
 
       expect(repository.delete).toHaveBeenCalledWith(filter);
       expect(result).toEqual(deleteResult);

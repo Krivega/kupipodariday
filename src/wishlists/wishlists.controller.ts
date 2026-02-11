@@ -49,7 +49,7 @@ export class WishlistsController {
 
   @Get(':id')
   public async findOne(@Param('id') id: string) {
-    const wishlist = await this.wishlistsService.findOne(
+    const wishlist = await this.wishlistsService.findOneWishlistEntity(
       { id: Number(id) },
       { relations: ['owner', 'items'] },
     );
@@ -67,7 +67,7 @@ export class WishlistsController {
     @Param('id') id: string,
     @Body() updateWishlistDto: UpdateWishlistDto,
   ) {
-    const wishlist = await this.wishlistsService.findOne(
+    const wishlist = await this.wishlistsService.findOneWishlistEntity(
       { id: Number(id) },
       { relations: ['owner'] },
     );
@@ -82,7 +82,10 @@ export class WishlistsController {
       throw wishlistForbiddenException;
     }
 
-    return this.wishlistsService.update({ id: Number(id) }, updateWishlistDto);
+    return this.wishlistsService.updateWishlistEntity(
+      { id: Number(id) },
+      updateWishlistDto,
+    );
   }
 
   @Delete(':id')
@@ -90,7 +93,7 @@ export class WishlistsController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
   ) {
-    const wishlist = await this.wishlistsService.findOne(
+    const wishlist = await this.wishlistsService.findOneWishlistEntity(
       { id: Number(id) },
       { relations: ['owner'] },
     );
@@ -105,6 +108,6 @@ export class WishlistsController {
       throw wishlistForbiddenException;
     }
 
-    return this.wishlistsService.remove({ id: Number(id) });
+    return this.wishlistsService.removeWishlistEntity({ id: Number(id) });
   }
 }

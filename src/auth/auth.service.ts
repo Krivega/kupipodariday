@@ -28,7 +28,7 @@ export class AuthService {
 
   /** Инвалидирует все JWT пользователя: увеличивает tokenVersion в БД */
   public async signout(userId: number): Promise<void> {
-    await this.usersService.incrementTokenVersion(userId);
+    await this.usersService.incrementTokenVersionUserEntity(userId);
   }
 
   public async findOneByCredentials({

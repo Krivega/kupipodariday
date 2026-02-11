@@ -12,7 +12,7 @@ describe('AuthController', () => {
 
   const mockUsersService = {
     create: jest.fn(),
-    findOne: jest.fn(),
+    hasExistsUserEntity: jest.fn(),
   };
 
   const mockJwtService = {

@@ -51,10 +51,11 @@ export class AuthController {
 
   @Post('signup')
   public async signup(@Body() createUserDto: CreateUserDto) {
-    const isUserExistsByUsernameOrEmail = await this.usersService.hasExists([
-      { username: createUserDto.username },
-      { email: createUserDto.email },
-    ]);
+    const isUserExistsByUsernameOrEmail =
+      await this.usersService.hasExistsUserEntity([
+        { username: createUserDto.username },
+        { email: createUserDto.email },
+      ]);
 
     if (isUserExistsByUsernameOrEmail) {
       throw userAlreadyExistsException;
