@@ -19,12 +19,12 @@
     "start:debug": "nest start --debug --watch",
     "start:dev": "nest start --watch",
     "start:prod": "node dist/main",
+    "swagger:generate": "GENERATE_SWAGGER=1 npm run start",
     "test": "jest",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "test:watch": "jest --watch",
-    "swagger:generate": "GENERATE_SWAGGER=1 npm run start"
+    "test:watch": "jest --watch"
   },
   "dependencies": {
     "@nestjs/common": "^11.1.13",
