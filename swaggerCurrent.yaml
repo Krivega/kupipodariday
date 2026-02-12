@@ -20,14 +20,14 @@ paths:
             schema:
               $ref: "#/components/schemas/FindUsersDto"
       responses:
-        "201":
+        "200":
           description: List of found users
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/UserProfileResponseDto"
+                  $ref: "#/components/schemas/UserPublicProfileResponseDto"
       summary: Search users by query
       tags: &a1
         - users
@@ -168,8 +168,8 @@ paths:
           in: path
           description: Offer ID
           schema:
-            example: "1"
-            type: string
+            example: 1
+            type: number
       responses:
         "200":
           description: Offer
@@ -267,7 +267,11 @@ paths:
               $ref: "#/components/schemas/UpdateWishDto"
       responses:
         "200":
-          description: Wish updated
+          description: Updated wish
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WishResponseDto"
       summary: Update wish
       tags: *a3
     delete:
@@ -418,14 +422,14 @@ paths:
             schema:
               $ref: "#/components/schemas/SigninUserDto"
       responses:
-        "201":
+        "200":
           description: JWT access token
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/SigninUserResponseDto"
         "401":
-          description: Некорректная пара логин и пароль
+          description: Invalid username or password
       summary: Sign in
       tags: &a5
         - auth
@@ -456,7 +460,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/SignupUserResponseDto"
         "409":
-          description: Пользователь с таким email или username уже зарегистрирован
+          description: User with this email or username is already registered
       summary: Sign up
       tags: *a5
 info:
@@ -486,6 +490,38 @@ components:
           example: some@ya.ru
       required:
         - query
+    UserPublicProfileResponseDto:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 1
+        createdAt:
+          format: date-time
+          type: string
+        updatedAt:
+          format: date-time
+          type: string
+        username:
+          type: string
+          example: johndoe
+          minLength: 2
+          maxLength: 30
+        about:
+          type: string
+          example: Пока ничего не рассказал о себе
+          minLength: 2
+          maxLength: 200
+        avatar:
+          type: string
+          example: https://i.pravatar.cc/300
+      required:
+        - id
+        - createdAt
+        - updatedAt
+        - username
+        - about
+        - avatar
     UserProfileResponseDto:
       type: object
       properties:
@@ -550,7 +586,7 @@ components:
           description: User password, min 6 characters
           example: secret123
           minLength: 6
-    UserPublicProfileResponseDto:
+    WishPartialDto:
       type: object
       properties:
         id:
@@ -562,26 +598,78 @@ components:
         updatedAt:
           format: date-time
           type: string
-        username:
+        name:
           type: string
-          example: johndoe
-          minLength: 2
-          maxLength: 30
-        about:
+          example: Gift name
+          minLength: 1
+          maxLength: 250
+        link:
           type: string
-          example: Пока ничего не рассказал о себе
-          minLength: 2
-          maxLength: 200
-        avatar:
+          example: https://example.com/item
+        image:
           type: string
-          example: https://i.pravatar.cc/300
+          example: https://example.com/image.jpg
+        price:
+          type: number
+          example: 99.99
+          minimum: 1
+        raised:
+          type: number
+          example: 0
+          minimum: 0
+        copied:
+          type: number
+          example: 0
+        description:
+          type: string
+          example: Description text
+          minLength: 1
+          maxLength: 1024
       required:
         - id
         - createdAt
         - updatedAt
-        - username
-        - about
-        - avatar
+        - name
+        - link
+        - image
+        - price
+        - raised
+        - copied
+        - description
+    OfferResponseDto:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 1
+        createdAt:
+          format: date-time
+          type: string
+        updatedAt:
+          format: date-time
+          type: string
+        amount:
+          type: number
+          example: 50.5
+        hidden:
+          type: boolean
+          example: false
+        item:
+          description: Wish item (partial, without owner/offers)
+          allOf:
+            - $ref: "#/components/schemas/WishPartialDto"
+        user:
+          description: Contributor (public profile; email only for wish owner)
+          allOf:
+            - $ref: "#/components/schemas/UserPublicProfileResponseDto"
+      required:
+        - id
+        - createdAt
+        - updatedAt
+        - amount
+        - hidden
+        - item
+        - user
     WishResponseDto:
       type: object
       properties:
@@ -604,7 +692,7 @@ components:
         raised:
           type: number
           example: 0
-          minimum: 1
+          minimum: 0
         copied:
           type: number
           example: 0
@@ -636,38 +724,6 @@ components:
         - updatedAt
         - owner
         - offers
-    OfferResponseDto:
-      type: object
-      properties:
-        id:
-          type: number
-          example: 1
-        createdAt:
-          format: date-time
-          type: string
-        updatedAt:
-          format: date-time
-          type: string
-        amount:
-          type: number
-          example: 50.5
-        hidden:
-          type: boolean
-          example: false
-        item:
-          description: Wish item
-          allOf:
-            - $ref: "#/components/schemas/WishResponseDto"
-        user:
-          $ref: "#/components/schemas/UserProfileResponseDto"
-      required:
-        - id
-        - createdAt
-        - updatedAt
-        - amount
-        - hidden
-        - item
-        - user
     UserWishesDto:
       type: object
       properties:
@@ -779,64 +835,28 @@ components:
       properties:
         name:
           type: string
-        link:
-          type: string
-        image:
-          type: string
-        price:
-          type: number
-        description:
-          type: string
-    WishPartialDto:
-      type: object
-      properties:
-        id:
-          type: number
-          example: 1
-        createdAt:
-          format: date-time
-          type: string
-        updatedAt:
-          format: date-time
-          type: string
-        name:
-          type: string
+          description: Wish name, string 1-250 characters
           example: Gift name
           minLength: 1
           maxLength: 250
         link:
           type: string
+          description: Wish link, string
           example: https://example.com/item
         image:
           type: string
+          description: Wish image, string
           example: https://example.com/image.jpg
         price:
           type: number
+          description: Wish price, number
           example: 99.99
-          minimum: 1
-        raised:
-          type: number
-          example: 0
-          minimum: 1
-        copied:
-          type: number
-          example: 0
         description:
           type: string
+          description: Wish description, string 1-1024 characters
           example: Description text
           minLength: 1
           maxLength: 1024
-      required:
-        - id
-        - createdAt
-        - updatedAt
-        - name
-        - link
-        - image
-        - price
-        - raised
-        - copied
-        - description
     WishlistResponseDto:
       type: object
       properties:
@@ -899,6 +919,7 @@ components:
             type: number
       required:
         - name
+        - image
     UpdateWishlistDto:
       type: object
       properties:

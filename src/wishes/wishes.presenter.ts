@@ -16,7 +16,13 @@ import { WishesService } from './wishes.service';
 import type { WishPartialDto } from './dto/wish-partial.dto';
 import type { WishResponseDto } from './dto/wish-response.dto';
 
-const WISH_VIEW_RELATIONS = ['owner', 'offers', 'offers.user'] as const;
+const WISH_VIEW_RELATIONS = [
+  'owner',
+  'offers',
+  'offers.user',
+  'offers.item',
+  'offers.item.owner',
+] as const;
 const WISH_OWNER_RELATION = ['owner'] as const;
 
 @Injectable()
