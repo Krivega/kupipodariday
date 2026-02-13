@@ -24,15 +24,37 @@ import { WishesPresenter } from './wishes.presenter';
 import type { AuthenticatedUser } from '@/auth/decorators/currentUser.decorator';
 
 @ApiTags('wishes')
-@UseGuards(AuthJwtGuard)
 @Controller('wishes')
 export class WishesController {
   public constructor(private readonly wishPresenter: WishesPresenter) {}
+
+  @Get('last')
+  @ApiOperation({ summary: 'Get last wishes' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of last wishes',
+    type: [WishResponseDto],
+  })
+  public async findLast(): Promise<WishResponseDto[]> {
+    return this.wishPresenter.findManyLast();
+  }
+
+  @Get('top')
+  @ApiOperation({ summary: 'Get top wishes' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of top wishes',
+    type: [WishResponseDto],
+  })
+  public async findTop(): Promise<WishResponseDto[]> {
+    return this.wishPresenter.findManyTop();
+  }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create wish' })
   @ApiResponse({ status: 201, description: 'Created wish', type: Object })
+  @UseGuards(AuthJwtGuard)
   public async create(
     @CurrentUser() user: AuthenticatedUser,
     @Body() createWishDto: CreateWishDto,
@@ -43,35 +65,10 @@ export class WishesController {
     });
   }
 
-  @Get('last')
-  @ApiOperation({ summary: 'Get last wishes' })
-  @ApiResponse({
-    status: 200,
-    description: 'List of last wishes',
-    type: [WishResponseDto],
-  })
-  public async findLast(
-    @CurrentUser() user: AuthenticatedUser,
-  ): Promise<WishResponseDto[]> {
-    return this.wishPresenter.findManyLast(user.id);
-  }
-
-  @Get('top')
-  @ApiOperation({ summary: 'Get top wishes' })
-  @ApiResponse({
-    status: 200,
-    description: 'List of top wishes',
-    type: [WishResponseDto],
-  })
-  public async findTop(
-    @CurrentUser() user: AuthenticatedUser,
-  ): Promise<WishResponseDto[]> {
-    return this.wishPresenter.findManyTop(user.id);
-  }
-
   @Get(':id')
   @ApiOperation({ summary: 'Get wish by id' })
   @ApiResponse({ status: 200, description: 'Wish', type: WishResponseDto })
+  @UseGuards(AuthJwtGuard)
   public async findOne(
     @CurrentUser() user: AuthenticatedUser,
     @Param() params: WishIdParameterDto,
@@ -109,6 +106,7 @@ export class WishesController {
     description: 'Deleted wish',
     type: WishResponseDto,
   })
+  @UseGuards(AuthJwtGuard)
   public async removeOne(
     @CurrentUser() user: AuthenticatedUser,
     @Param() params: WishIdParameterDto,
@@ -122,6 +120,7 @@ export class WishesController {
     summary: 'Copy wish',
   })
   @ApiResponse({ status: 201, description: 'Copied wish', type: Object })
+  @UseGuards(AuthJwtGuard)
   public async copyWish(
     @CurrentUser() user: AuthenticatedUser,
     @Param() params: WishIdParameterDto,

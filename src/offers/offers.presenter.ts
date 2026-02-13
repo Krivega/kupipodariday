@@ -101,14 +101,20 @@ export class OffersPresenter {
 
   public buildOffersView(
     offers: Offer[] | undefined,
-    currentUserId: number,
+    currentUserId?: number,
   ): OfferResponseDto[] {
     return this.getVisibleOffers(offers, currentUserId).map((offer) => {
       return this.buildOfferView(offer, currentUserId);
     });
   }
 
-  public buildOfferView(offer: Offer, currentUserId: number): OfferResponseDto {
+  public buildOfferView(
+    offer: Offer,
+    currentUserId?: number,
+  ): OfferResponseDto {
+    const isOwner =
+      currentUserId !== undefined && offer.item.owner.id === currentUserId;
+
     return {
       id: offer.id,
       createdAt: offer.createdAt,
@@ -116,10 +122,9 @@ export class OffersPresenter {
       amount: offer.amount,
       hidden: offer.hidden,
       item: this.wishPresenter.buildWishPartialView(offer.item),
-      user:
-        offer.item.owner.id === currentUserId
-          ? this.userPresenter.toProfile(offer.user)
-          : this.userPresenter.toPublicProfile(offer.user),
+      user: isOwner
+        ? this.userPresenter.toProfile(offer.user)
+        : this.userPresenter.toPublicProfile(offer.user),
     };
   }
 
@@ -166,13 +171,16 @@ export class OffersPresenter {
   /**
    * Offer is visible if not hidden OR if current user is the offer's user.
    */
-  private hasVisibleOffer(offer: Offer, currentUserId: number): boolean {
-    return !offer.hidden || offer.user.id === currentUserId;
+  private hasVisibleOffer(offer: Offer, currentUserId?: number): boolean {
+    return (
+      !offer.hidden ||
+      (currentUserId !== undefined && offer.user.id === currentUserId)
+    );
   }
 
   private getVisibleOffers(
     offers: Offer[] | undefined,
-    currentUserId: number,
+    currentUserId?: number,
   ): Offer[] {
     return (offers ?? []).filter((offer) => {
       return this.hasVisibleOffer(offer, currentUserId);

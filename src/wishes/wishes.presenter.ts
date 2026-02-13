@@ -34,7 +34,7 @@ export class WishesPresenter {
   ) {}
 
   public async findManyLast(
-    currentUserId: number,
+    currentUserId?: number,
     take = 40,
   ): Promise<WishResponseDto[]> {
     const wishes = await this.wishesService.findManyWishEntity(undefined, {
@@ -49,7 +49,7 @@ export class WishesPresenter {
   }
 
   public async findManyTop(
-    currentUserId: number,
+    currentUserId?: number,
     take = 20,
   ): Promise<WishResponseDto[]> {
     const wishes = await this.wishesService.findManyWishEntity(undefined, {
@@ -221,7 +221,7 @@ export class WishesPresenter {
     return this.buildWishView(fullWish, userId);
   }
 
-  public buildWishView(wish: Wish, currentUserId: number): WishResponseDto {
+  public buildWishView(wish: Wish, currentUserId?: number): WishResponseDto {
     const wishPartialView = this.buildWishPartialView(wish);
 
     return {
