@@ -179,6 +179,37 @@ paths:
                 $ref: "#/components/schemas/OfferResponseDto"
       summary: Get offer by id
       tags: *a2
+  /wishes/last:
+    get:
+      operationId: WishesController_findLast
+      parameters: []
+      responses:
+        "200":
+          description: List of last wishes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WishResponseDto"
+      summary: Get last wishes
+      tags: &a3
+        - wishes
+  /wishes/top:
+    get:
+      operationId: WishesController_findTop
+      parameters: []
+      responses:
+        "200":
+          description: List of top wishes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WishResponseDto"
+      summary: Get top wishes
+      tags: *a3
   /wishes:
     post:
       operationId: WishesController_create
@@ -197,37 +228,6 @@ paths:
               schema:
                 type: object
       summary: Create wish
-      tags: &a3
-        - wishes
-  /wishes/last:
-    get:
-      operationId: WishesController_findLast
-      parameters: []
-      responses:
-        "200":
-          description: List of last wishes
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/WishResponseDto"
-      summary: Get last wishes
-      tags: *a3
-  /wishes/top:
-    get:
-      operationId: WishesController_findTop
-      parameters: []
-      responses:
-        "200":
-          description: List of top wishes
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/WishResponseDto"
-      summary: Get top wishes
       tags: *a3
   /wishes/{id}:
     get:
